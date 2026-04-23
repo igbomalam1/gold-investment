@@ -28,14 +28,27 @@ function LoginPage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitting(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setSubmitting(false);
-    if (error) {
-      toast.error(error.message || "Invalid credentials");
-      return;
+    try {
+      setSubmitting(true);
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        toast.error(error.message || "Invalid credentials");
+        setSubmitting(false);
+        return;
+      }
+      toast.success("Welcome back!");
+      // Don't setSubmitting(false) here, the redirect effect will handle it by unmounting
+    } catch (err) {
+      console.error("Login error:", err);
+      toast.error("An unexpected error occurred. Please try again.");
+      setSubmitting(false);
     }
-    toast.success("Welcome back!");
+  };
+
+  const handleReset = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.reload();
   };
 
   return (
@@ -100,6 +113,13 @@ function LoginPage() {
               Open an account
             </Link>
           </p>
+          
+          <button 
+            onClick={handleReset}
+            className="mt-6 w-full text-center text-[10px] uppercase tracking-widest text-muted-foreground/50 hover:text-primary transition-colors"
+          >
+            Stuck? Reset Connection
+          </button>
         </div>
       </div>
     </div>

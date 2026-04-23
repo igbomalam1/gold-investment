@@ -52,7 +52,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (sess) {
           setSession(sess);
           setUser(sess.user);
-          await loadUserData(sess.user.id);
+          // Load profile in background, don't await to avoid blocking initial render
+          loadUserData(sess.user.id);
         }
       } catch (err) {
         console.error("Auth init error:", err);
@@ -69,18 +70,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(sess);
       setUser(sess?.user ?? null);
       
-      try {
-        if (sess?.user) {
-          await loadUserData(sess.user.id);
-        } else {
-          setProfile(null);
-          setIsAdmin(false);
-        }
-      } catch (err) {
-        console.error("Auth change error:", err);
-      } finally {
-        if (mounted) setLoading(false);
+      if (sess?.user) {
+        setLoading(true); // Re-trigger loading for data fetch
+        await loadUserData(sess.user.id);
+      } else {
+        setProfile(null);
+        setIsAdmin(false);
       }
+      setLoading(false);
     });
 
     return () => {
@@ -94,6 +91,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
   const signOut = async () => {
     await supabase.auth.signOut();
+    localStorage.clear(); // Clear everything to be safe
+    window.location.href = "/"; // Hard reload to clear all states
   };
 
   return (

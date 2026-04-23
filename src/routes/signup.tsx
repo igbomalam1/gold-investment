@@ -23,7 +23,7 @@ function SignupPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/dashboard" });
+    if (!loading && user) navigate({ to: "/dashboard", replace: true });
   }, [user, loading, navigate]);
 
   // Auto-detect country from timezone
@@ -76,7 +76,7 @@ function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-hero py-10">
+    <div className="min-h-screen bg-background py-10">
       <div className="mx-auto max-w-md px-5">
         <Link to="/" className="inline-block">
           <Logo size={48} />

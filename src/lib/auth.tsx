@@ -42,26 +42,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    // 1) listener first
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
+    let mounted = true;
+
+    async function init() {
+      const { data: { session: sess } } = await supabase.auth.getSession();
+      if (!mounted) return;
+
+      if (sess) {
+        setSession(sess);
+        setUser(sess.user);
+        await loadUserData(sess.user.id);
+      }
+      setLoading(false);
+    }
+
+    init();
+
+    const { data: sub } = supabase.auth.onAuthStateChange(async (event, sess) => {
+      if (!mounted) return;
+      
       setSession(sess);
       setUser(sess?.user ?? null);
+      
       if (sess?.user) {
-        // defer to avoid deadlocks
-        setTimeout(() => loadUserData(sess.user.id), 0);
+        await loadUserData(sess.user.id);
       } else {
         setProfile(null);
         setIsAdmin(false);
       }
+      setLoading(false);
     });
-    // 2) then existing session
-    supabase.auth.getSession().then(({ data: { session: sess } }) => {
-      setSession(sess);
-      setUser(sess?.user ?? null);
-      if (sess?.user) loadUserData(sess.user.id).finally(() => setLoading(false));
-      else setLoading(false);
-    });
-    return () => sub.subscription.unsubscribe();
+
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   const refreshProfile = async () => {

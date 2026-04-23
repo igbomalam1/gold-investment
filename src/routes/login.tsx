@@ -21,7 +21,7 @@ function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      navigate({ to: isAdmin ? "/admin" : "/dashboard" });
+      navigate({ to: isAdmin ? "/admin" : "/dashboard", replace: true });
     }
   }, [user, isAdmin, loading, navigate]);
 
@@ -38,7 +38,7 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-hero py-10">
+    <div className="min-h-screen bg-background py-10">
       <div className="mx-auto max-w-md px-5">
         <Link to="/" className="inline-block">
           <Logo size={48} />

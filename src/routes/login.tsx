@@ -37,18 +37,10 @@ function LoginPage() {
         return;
       }
       toast.success("Welcome back!");
-      // Don't setSubmitting(false) here, the redirect effect will handle it by unmounting
     } catch (err) {
-      console.error("Login error:", err);
-      toast.error("An unexpected error occurred. Please try again.");
+      toast.error("An unexpected error occurred.");
       setSubmitting(false);
     }
-  };
-
-  const handleReset = () => {
-    localStorage.clear();
-    sessionStorage.clear();
-    window.location.reload();
   };
 
   return (
@@ -113,13 +105,6 @@ function LoginPage() {
               Open an account
             </Link>
           </p>
-          
-          <button 
-            onClick={handleReset}
-            className="mt-6 w-full text-center text-[10px] uppercase tracking-widest text-muted-foreground/50 hover:text-primary transition-colors"
-          >
-            Stuck? Reset Connection
-          </button>
         </div>
       </div>
     </div>

@@ -21,13 +21,15 @@ export function DashboardShell() {
     if (!loading && !user) navigate({ to: "/login", replace: true });
   }, [loading, user, navigate]);
 
-  if (loading || !user) {
+  if (loading) {
     return (
       <div className="grid min-h-screen place-items-center">
         <Loader2 className="animate-spin text-primary" />
       </div>
     );
   }
+
+  if (!user) return null;
 
   const handleSignOut = async () => {
     await signOut();

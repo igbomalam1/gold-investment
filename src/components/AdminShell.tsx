@@ -29,18 +29,22 @@ export function AdminShell() {
     }
   }, [user, isAdmin, loading, navigate]);
 
-  if (loading || !user || !isAdmin) {
+  if (loading) {
     return (
       <div className="grid min-h-screen place-items-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground animate-pulse">
-            Verifying administrative access...
+            Loading secure console...
           </p>
         </div>
       </div>
     );
   }
+
+  // If we've reached here and still don't have a user or admin rights, 
+  // the useEffect will handle the redirect. We return null to avoid flashing content.
+  if (!user || !isAdmin) return null;
 
   const handleSignOut = async () => {
     await signOut();

@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (sess) {
           setSession(sess);
           setUser(sess.user);
-          // Load profile in background, don't await to avoid blocking initial render
+          // Load in background
           loadUserData(sess.user.id);
         }
       } catch (err) {
@@ -71,13 +71,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(sess?.user ?? null);
       
       if (sess?.user) {
-        setLoading(true); // Re-trigger loading for data fetch
-        await loadUserData(sess.user.id);
+        // Fetch data but DO NOT set global loading=true again
+        // This prevents the 'infinite spinner' in components like AdminShell
+        loadUserData(sess.user.id);
       } else {
         setProfile(null);
         setIsAdmin(false);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => {

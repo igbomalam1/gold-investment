@@ -1,6 +1,9 @@
-import { useState } from "react";
-import { Bell, X, Check, Info, AlertTriangle, CheckCircle, AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Bell, X, CheckCircle, AlertTriangle, AlertCircle, Info, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
+import { toast } from "sonner";
 
 type Notification = {
   id: string;
@@ -11,46 +14,82 @@ type Notification = {
   created_at: string;
 };
 
-const MOCK_NOTIFICATIONS: Notification[] = [
-  {
-    id: "1",
-    title: "Deposit Confirmed",
-    message: "Your deposit of $5,000.00 via USDT has been confirmed. Your funds are now available for investment.",
-    type: "success",
-    is_read: false,
-    created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 mins ago
-  },
-  {
-    id: "2",
-    title: "New Investment Active",
-    message: "Your Emerald plan investment is now active. Daily returns will start compounding from tomorrow.",
-    type: "info",
-    is_read: false,
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
-  },
-  {
-    id: "3",
-    title: "Market Alert: Gold",
-    message: "Gold price (XAU) has increased by 1.2% in the last 4 hours. Portfolio hedge active.",
-    type: "warning",
-    is_read: true,
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-  },
-];
-
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
-  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
   
+  const fetchNotifications = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setNotifications(data || []);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+
+    // Subscribe to new notifications
+    const channel = supabase
+      .channel("realtime-notifications")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user?.id}` },
+        () => fetchNotifications()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
-  const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+  const markAllAsRead = async () => {
+    if (!user) return;
+    try {
+      setLoading(true);
+      const { error } = await supabase
+        .from("notifications")
+        .update({ is_read: true })
+        .eq("user_id", user.id)
+        .eq("is_read", false);
+
+      if (error) throw error;
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+      toast.success("All caught up!");
+    } catch (error) {
+      toast.error("Failed to mark as read");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const deleteNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
+  const deleteNotification = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("notifications")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+      setNotifications(prev => prev.filter(n => n.id !== id));
+    } catch (error) {
+      toast.error("Failed to delete notification");
+    }
   };
+
 
   const getIcon = (type: string) => {
     switch (type) {

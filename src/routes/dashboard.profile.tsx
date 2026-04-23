@@ -1,8 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Mail, Globe, Shield, Wallet, ArrowUpRight, Loader2 } from "lucide-react";
+import { Mail, Globe, Shield, Wallet, ArrowUpRight, Loader2, Camera } from "lucide-react";
+import { useState } from "react";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
-import avatar from "@/assets/profile/user-avatar.png";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import defaultAvatar from "@/assets/profile/user-avatar.png";
 
 export const Route = createFileRoute("/dashboard/profile")({
   head: () => ({ meta: [{ title: "Profile — Gold Empire" }] }),
@@ -10,8 +13,45 @@ export const Route = createFileRoute("/dashboard/profile")({
 });
 
 function ProfilePage() {
-  const { profile, user, loading } = useAuth();
+  const { profile, user, loading, refreshProfile } = useAuth();
+  const [uploading, setUploading] = useState(false);
   
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploading(true);
+      if (!e.target.files || e.target.files.length === 0) return;
+      if (!user) return;
+
+      const file = e.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}/${Math.random()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      await refreshProfile();
+      toast.success("Profile picture updated!");
+    } catch (error: any) {
+      toast.error(error.message || "Error uploading image");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (loading || !profile) {
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center gap-4">
@@ -36,13 +76,26 @@ function ProfilePage() {
         <div className="lg:col-span-2 rounded-3xl bg-gradient-emerald p-1 shadow-emerald">
           <div className="h-full rounded-[calc(1.5rem-4px)] bg-card/80 p-8 backdrop-blur-xl">
             <div className="flex flex-wrap items-center gap-6">
-              <div className="relative">
-                <img 
-                  src={avatar} 
-                  alt="Profile" 
-                  className="h-24 w-24 rounded-full border-2 border-gold object-cover shadow-gold"
+              <div className="relative group cursor-pointer">
+                <input
+                  type="file"
+                  id="avatar-upload"
+                  accept="image/*"
+                  onChange={handleUpload}
+                  disabled={uploading}
+                  className="hidden"
                 />
-                <div className="absolute -bottom-1 -right-1 rounded-full bg-success p-1 text-success-foreground ring-4 ring-card">
+                <label htmlFor="avatar-upload" className="block relative cursor-pointer group">
+                  <img 
+                    src={profile.avatar_url || defaultAvatar} 
+                    alt="Profile" 
+                    className="h-24 w-24 rounded-full border-2 border-gold object-cover shadow-gold transition-opacity group-hover:opacity-60"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    {uploading ? <Loader2 className="animate-spin text-white" /> : <Camera className="text-white" />}
+                  </div>
+                </label>
+                <div className="absolute -bottom-1 -right-1 rounded-full bg-success p-1 text-success-foreground ring-4 ring-card shadow-sm">
                   <Shield size={14} />
                 </div>
               </div>

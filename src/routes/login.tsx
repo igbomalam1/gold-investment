@@ -21,7 +21,8 @@ function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      navigate({ to: isAdmin ? "/admin" : "/dashboard", replace: true });
+      const target = isAdmin ? "/admin" : "/dashboard";
+      navigate({ to: target, replace: true });
     }
   }, [user, isAdmin, loading, navigate]);
 

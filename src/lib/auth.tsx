@@ -45,15 +45,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let mounted = true;
 
     async function init() {
-      const { data: { session: sess } } = await supabase.auth.getSession();
-      if (!mounted) return;
+      try {
+        const { data: { session: sess } } = await supabase.auth.getSession();
+        if (!mounted) return;
 
-      if (sess) {
-        setSession(sess);
-        setUser(sess.user);
-        await loadUserData(sess.user.id);
+        if (sess) {
+          setSession(sess);
+          setUser(sess.user);
+          await loadUserData(sess.user.id);
+        }
+      } catch (err) {
+        console.error("Auth init error:", err);
+      } finally {
+        if (mounted) setLoading(false);
       }
-      setLoading(false);
     }
 
     init();
@@ -64,13 +69,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(sess);
       setUser(sess?.user ?? null);
       
-      if (sess?.user) {
-        await loadUserData(sess.user.id);
-      } else {
-        setProfile(null);
-        setIsAdmin(false);
+      try {
+        if (sess?.user) {
+          await loadUserData(sess.user.id);
+        } else {
+          setProfile(null);
+          setIsAdmin(false);
+        }
+      } catch (err) {
+        console.error("Auth change error:", err);
+      } finally {
+        if (mounted) setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => {

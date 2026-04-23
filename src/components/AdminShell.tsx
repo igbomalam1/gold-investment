@@ -20,15 +20,24 @@ export function AdminShell() {
   const { user, isAdmin, loading, signOut } = useAuth();
 
   useEffect(() => {
-    if (loading) return;
-    if (!user) navigate({ to: "/login" });
-    else if (!isAdmin) navigate({ to: "/dashboard" });
+    if (!loading) {
+      if (!user) {
+        navigate({ to: "/login", replace: true });
+      } else if (!isAdmin) {
+        navigate({ to: "/dashboard", replace: true });
+      }
+    }
   }, [user, isAdmin, loading, navigate]);
 
   if (loading || !user || !isAdmin) {
     return (
-      <div className="grid min-h-screen place-items-center">
-        <Loader2 className="animate-spin text-primary" />
+      <div className="grid min-h-screen place-items-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground animate-pulse">
+            Verifying administrative access...
+          </p>
+        </div>
       </div>
     );
   }

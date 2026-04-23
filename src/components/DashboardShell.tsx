@@ -18,7 +18,7 @@ export function DashboardShell() {
   const { user, loading, signOut } = useAuth();
 
   useEffect(() => {
-    if (!loading && !user) navigate({ to: "/login" });
+    if (!loading && !user) navigate({ to: "/login", replace: true });
   }, [loading, user, navigate]);
 
   if (loading || !user) {

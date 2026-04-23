@@ -1,4 +1,4 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, Link, createRootRoute } from "@tanstack/react-router";
 import { AuthProvider } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -27,54 +27,9 @@ function NotFoundComponent() {
 }
 
 export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Gold Empire Investment" },
-      { name: "description", content: "A full designed investment platform with monthly ROI" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Gold Empire Investment" },
-      { property: "og:description", content: "A full designed investment platform with monthly ROI" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Gold Empire Investment" },
-      { name: "twitter:description", content: "A full designed investment platform with monthly ROI" },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/SRLt8cwX2AVSHd6EqQhX4aZYmQL2/social-images/social-1776924684172-goldinv.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/SRLt8cwX2AVSHd6EqQhX4aZYmQL2/social-images/social-1776924684172-goldinv.webp" },
-    ],
-    links: [
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap",
-      },
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-    ],
-  }),
-  shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
 });
-
-function RootShell({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  );
-}
 
 function RootComponent() {
   return (
@@ -84,3 +39,4 @@ function RootComponent() {
     </AuthProvider>
   );
 }
+

@@ -1,4 +1,5 @@
-import { Mail, Globe, CalendarDays, Shield, Wallet, ArrowUpRight } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Mail, Globe, Shield, Wallet, ArrowUpRight, Loader2 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
 import avatar from "@/assets/profile/user-avatar.png";
@@ -9,8 +10,17 @@ export const Route = createFileRoute("/dashboard/profile")({
 });
 
 function ProfilePage() {
-  const { profile, user } = useAuth();
-  if (!profile) return null;
+  const { profile, user, loading } = useAuth();
+  
+  if (loading || !profile) {
+    return (
+      <div className="flex min-h-[400px] flex-col items-center justify-center gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Synchronizing profile data...</p>
+      </div>
+    );
+  }
+
 
   return (
     <div className="space-y-6">

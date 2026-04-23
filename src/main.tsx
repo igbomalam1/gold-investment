@@ -9,4 +9,3 @@ const router = getRouter();
 const rootElement = document.getElementById("root")!;
 const root = ReactDOM.createRoot(rootElement);
 root.render(<RouterProvider router={router} />);
-

@@ -1,11 +1,19 @@
+import adrien from "@/assets/team/adrien.png";
+import hannah from "@/assets/team/hannah.png";
+import kenji from "@/assets/team/kenji.png";
+import sade from "@/assets/team/sade.png";
+import marco from "@/assets/team/marco.png";
+import eleanor from "@/assets/team/eleanor.png";
+
 const TEAM = [
-  { name: "Adrien Rousseau", role: "CEO & Co-founder", bio: "Ex-Goldman Sachs commodities desk, 14 yrs.", emoji: "🇫🇷" },
-  { name: "Hannah Vogel", role: "Chief Investment Officer", bio: "Former BlackRock multi-asset PM.", emoji: "🇩🇪" },
-  { name: "Kenji Watanabe", role: "Head of Crypto Trading", bio: "Built Tokyo's largest OTC desk.", emoji: "🇯🇵" },
-  { name: "Sade Adebayo", role: "Head of Risk", bio: "Quant lead, 10+ yrs across HSBC & Citadel.", emoji: "🇳🇬" },
-  { name: "Marco Bianchi", role: "Chief Technology Officer", bio: "Architect at Coinbase Custody.", emoji: "🇮🇹" },
-  { name: "Eleanor Hayes", role: "Head of Compliance", bio: "Former FCA senior officer, London.", emoji: "🇬🇧" },
+  { name: "Adrien Rousseau", role: "CEO & Co-founder", bio: "Ex-Goldman Sachs commodities desk, 14 yrs.", image: adrien },
+  { name: "Hannah Vogel", role: "Chief Investment Officer", bio: "Former BlackRock multi-asset PM.", image: hannah },
+  { name: "Kenji Watanabe", role: "Head of Crypto Trading", bio: "Built Tokyo's largest OTC desk.", image: kenji },
+  { name: "Sade Adebayo", role: "Head of Risk", bio: "Quant lead, 10+ yrs across HSBC & Citadel.", image: sade },
+  { name: "Marco Bianchi", role: "Chief Technology Officer", bio: "Architect at Coinbase Custody.", image: marco },
+  { name: "Eleanor Hayes", role: "Head of Compliance", bio: "Former FCA senior officer, London.", image: eleanor },
 ];
+
 
 export function TeamSection() {
   return (
@@ -26,8 +34,8 @@ export function TeamSection() {
               className="group relative overflow-hidden rounded-3xl border border-border/60 bg-card/70 p-7 backdrop-blur transition-all hover:-translate-y-1 hover:shadow-gold"
             >
               <div className="flex items-center gap-4">
-                <div className="grid h-16 w-16 place-items-center rounded-full bg-gradient-gold text-3xl shadow-gold">
-                  {m.emoji}
+                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full border border-gold/30 shadow-gold">
+                  <img src={m.image} alt={m.name} className="h-full w-full object-cover" />
                 </div>
                 <div>
                   <h3 className="font-display text-xl">{m.name}</h3>

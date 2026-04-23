@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LayoutDashboard } from "lucide-react";
 import { Logo } from "./Logo";
+import { useAuth } from "@/lib/auth";
+import { NotificationBell } from "./NotificationBell";
 
 const NAV = [
   { label: "Plans", href: "#plans" },
@@ -13,6 +15,7 @@ const NAV = [
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const { user } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/70 backdrop-blur-xl">
@@ -33,19 +36,34 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 lg:flex">
-          <Link
-            to="/login"
-            className="rounded-full px-5 py-2 text-sm font-medium text-foreground/85 hover:text-primary"
-          >
-            Sign in
-          </Link>
-          <Link
-            to="/signup"
-            className="rounded-full bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-gold transition-transform hover:scale-[1.03]"
-          >
-            Open Account
-          </Link>
+        <div className="hidden items-center gap-4 lg:flex">
+          {user ? (
+            <>
+              <NotificationBell />
+              <Link
+                to="/dashboard"
+                className="flex items-center gap-2 rounded-full bg-primary/10 px-5 py-2.5 text-sm font-semibold text-primary hover:bg-primary/20 transition-all"
+              >
+                <LayoutDashboard size={16} />
+                Dashboard
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="rounded-full px-5 py-2 text-sm font-medium text-foreground/85 hover:text-primary"
+              >
+                Sign in
+              </Link>
+              <Link
+                to="/signup"
+                className="rounded-full bg-gradient-gold px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-gold transition-transform hover:scale-[1.03]"
+              >
+                Open Account
+              </Link>
+            </>
+          )}
         </div>
 
         <button
@@ -71,20 +89,32 @@ export function SiteHeader() {
               </a>
             ))}
             <div className="mt-3 flex gap-3">
-              <Link
-                to="/login"
-                onClick={() => setOpen(false)}
-                className="flex-1 rounded-full border border-border px-4 py-2.5 text-center text-sm font-medium"
-              >
-                Sign in
-              </Link>
-              <Link
-                to="/signup"
-                onClick={() => setOpen(false)}
-                className="flex-1 rounded-full bg-gradient-gold px-4 py-2.5 text-center text-sm font-semibold text-primary-foreground"
-              >
-                Open Account
-              </Link>
+              {user ? (
+                <Link
+                  to="/dashboard"
+                  onClick={() => setOpen(false)}
+                  className="flex-1 rounded-full bg-primary py-2.5 text-center text-sm font-semibold text-primary-foreground shadow-lg"
+                >
+                  Go to Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    onClick={() => setOpen(false)}
+                    className="flex-1 rounded-full border border-border px-4 py-2.5 text-center text-sm font-medium"
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    to="/signup"
+                    onClick={() => setOpen(false)}
+                    className="flex-1 rounded-full bg-gradient-gold px-4 py-2.5 text-center text-sm font-semibold text-primary-foreground shadow-gold"
+                  >
+                    Open Account
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </div>

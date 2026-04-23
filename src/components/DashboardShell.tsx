@@ -3,6 +3,7 @@ import { LayoutDashboard, Coins, History, User, LogOut, Bell, Loader2 } from "lu
 import { useEffect } from "react";
 import { Logo } from "./Logo";
 import { useAuth } from "@/lib/auth";
+import { NotificationBell } from "./NotificationBell";
 
 const NAV = [
   { to: "/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -57,10 +58,9 @@ export function DashboardShell() {
               );
             })}
           </div>
-          <div className="flex items-center gap-2">
-            <button className="grid h-9 w-9 place-items-center rounded-full border border-border/70 hover:border-primary">
-              <Bell size={15} />
-            </button>
+          <div className="flex items-center gap-3">
+            <NotificationBell />
+            <div className="hidden h-8 w-px bg-border/50 sm:block" />
             <button
               onClick={handleSignOut}
               className="hidden h-9 items-center gap-1.5 rounded-full border border-border/70 px-3 text-xs font-medium hover:border-destructive hover:text-destructive sm:inline-flex"

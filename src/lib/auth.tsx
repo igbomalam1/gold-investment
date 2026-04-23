@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
 
   const loadUserData = async (uid: string) => {
@@ -72,7 +72,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (sess?.user) {
         // Fetch data but DO NOT set global loading=true again
-        // This prevents the 'infinite spinner' in components like AdminShell
         loadUserData(sess.user.id);
       } else {
         setProfile(null);

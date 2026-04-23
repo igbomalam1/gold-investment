@@ -23,13 +23,13 @@ export function AdminShell() {
     if (!loading) {
       if (!user) {
         navigate({ to: "/login", replace: true });
-      } else if (!isAdmin) {
+      } else if (isAdmin === false) {
         navigate({ to: "/dashboard", replace: true });
       }
     }
   }, [user, isAdmin, loading, navigate]);
 
-  if (loading) {
+  if (loading || isAdmin === null) {
     return (
       <div className="grid min-h-screen place-items-center bg-background">
         <div className="flex flex-col items-center gap-4">
@@ -44,7 +44,7 @@ export function AdminShell() {
 
   // If we've reached here and still don't have a user or admin rights, 
   // the useEffect will handle the redirect. We return null to avoid flashing content.
-  if (!user || !isAdmin) return null;
+  if (!user || isAdmin !== true) return null;
 
   const handleSignOut = async () => {
     await signOut();

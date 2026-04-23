@@ -20,7 +20,7 @@ function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && isAdmin !== null) {
       const target = isAdmin ? "/admin" : "/dashboard";
       navigate({ to: target, replace: true });
     }

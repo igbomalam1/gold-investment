@@ -110,7 +110,7 @@ function DashboardHome() {
           Earn $1 for every friend you refer! You'll receive $1 when your friend makes their first investment of $10 or more, and an additional $1 for every subsequent investment they make of $50 or more.
         </p>
         <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-          <div className="flex-1 rounded-xl border border-border bg-background/60 px-4 py-3 font-mono text-sm">
+          <div className="flex-1 min-w-0 rounded-xl border border-border bg-background/60 px-4 py-3 font-mono text-sm break-all whitespace-normal overflow-x-auto">
             {profile ? `${window.location.origin}/signup?ref=${(profile as any).referral_code || profile.id}` : ''}
           </div>
           <button 
@@ -119,9 +119,11 @@ function DashboardHome() {
               navigator.clipboard.writeText(`${window.location.origin}/signup?ref=${(profile as any).referral_code || profile.id}`);
               toast.success("Referral link copied!");
             }}
-            className="flex items-center gap-2 rounded-full bg-gradient-gold px-6 py-3 text-sm font-semibold text-primary-foreground shadow-gold"
+            className="w-full rounded-full bg-gradient-gold px-6 py-3 text-sm font-semibold text-primary-foreground shadow-gold sm:w-auto"
           >
-            <Copy size={16} /> Copy Link
+            <span className="flex items-center justify-center gap-2">
+              <Copy size={16} /> Copy Link
+            </span>
           </button>
         </div>
       </div>

@@ -63,9 +63,9 @@ export function DashboardShell() {
             <div className="hidden h-8 w-px bg-border/50 sm:block" />
             <button
               onClick={handleSignOut}
-              className="hidden h-9 items-center gap-1.5 rounded-full border border-border/70 px-3 text-xs font-medium hover:border-destructive hover:text-destructive sm:inline-flex"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border/70 px-3 text-xs font-medium hover:border-destructive hover:text-destructive"
             >
-              <LogOut size={13} /> Sign out
+              <LogOut size={13} /> <span className="hidden sm:inline">Sign out</span>
             </button>
           </div>
         </div>

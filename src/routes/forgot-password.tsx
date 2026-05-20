@@ -1,42 +1,41 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Logo } from "@/components/Logo";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/login")({
-  head: () => ({ meta: [{ title: "Sign in — Gold Empire Investment" }] }),
-  component: LoginPage,
+export const Route = createFileRoute("/forgot-password")({
+  head: () => ({ meta: [{ title: "Reset Password — Gold Empire Investment" }] }),
+  component: ForgotPasswordPage,
 });
 
-function LoginPage() {
+function ForgotPasswordPage() {
   const navigate = useNavigate();
-  const { user, isAdmin, loading } = useAuth();
   const [show, setShow] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [resetKey, setResetKey] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (!loading && user && isAdmin !== null) {
-      const target = isAdmin ? "/admin" : "/dashboard";
-      navigate({ to: target, replace: true });
-    }
-  }, [user, isAdmin, loading, navigate]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setSubmitting(true);
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.rpc("reset_password_with_key", {
+        _email: email,
+        _new_password: password,
+        _reset_key: resetKey,
+      });
+
       if (error) {
-        toast.error(error.message || "Invalid credentials");
+        toast.error(error.message || "Invalid or already used reset key.");
         setSubmitting(false);
         return;
       }
-      toast.success("Welcome back!");
+
+      toast.success("Password reset successfully! You can now sign in.");
+      navigate({ to: "/login" });
     } catch (err) {
       toast.error("An unexpected error occurred.");
       setSubmitting(false);
@@ -51,9 +50,9 @@ function LoginPage() {
         </Link>
 
         <div className="mt-8 rounded-3xl glass p-7 shadow-emerald">
-          <h1 className="font-display text-3xl">Welcome back</h1>
+          <h1 className="font-display text-3xl">Reset Password</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Sign in to access your portfolio.
+            Enter your email, new password, and the reset key provided by an admin.
           </p>
 
           <form onSubmit={onSubmit} className="mt-6 space-y-4">
@@ -68,8 +67,24 @@ function LoginPage() {
                 className="mt-1.5 w-full rounded-xl border border-border bg-background/60 px-4 py-3 text-sm outline-none focus:border-primary"
               />
             </div>
+            
             <div>
-              <label className="text-xs font-medium text-foreground/85">Password</label>
+              <label className="text-xs font-medium text-foreground/85">Reset Key</label>
+              <input
+                required
+                type="text"
+                value={resetKey}
+                onChange={(e) => setResetKey(e.target.value)}
+                placeholder="e.g. 8A3B2C1D"
+                className="mt-1.5 w-full font-mono uppercase tracking-wider rounded-xl border border-border bg-background/60 px-4 py-3 text-sm outline-none focus:border-primary"
+              />
+              <p className="mt-1.5 text-[11px] text-muted-foreground">
+                Don't have a reset key? Please contact the admin to receive one.
+              </p>
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-foreground/85">New Password</label>
               <div className="relative mt-1.5">
                 <input
                   required
@@ -87,27 +102,22 @@ function LoginPage() {
                   {show ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-              <div className="mt-2 text-right">
-                <Link to="/forgot-password" className="text-xs font-medium text-primary hover:underline">
-                  Forgot Password?
-                </Link>
-              </div>
             </div>
 
             <button
               type="submit"
               disabled={submitting}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-gold py-3 text-sm font-semibold text-primary-foreground shadow-gold disabled:opacity-60"
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-gold py-3 text-sm font-semibold text-primary-foreground shadow-gold disabled:opacity-60"
             >
               {submitting && <Loader2 size={14} className="animate-spin" />}
-              {submitting ? "Signing in…" : "Sign in"}
+              {submitting ? "Resetting…" : "Reset password"}
             </button>
           </form>
 
           <p className="mt-5 text-center text-xs text-muted-foreground">
-            New here?{" "}
-            <Link to="/signup" className="font-semibold text-primary">
-              Open an account
+            Remembered your password?{" "}
+            <Link to="/login" className="font-semibold text-primary">
+              Sign in
             </Link>
           </p>
         </div>

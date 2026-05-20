@@ -219,6 +219,8 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          referral_code: string | null
+          referrer_id: string | null
           total_invested: number
           total_profit: number
           updated_at: string
@@ -231,6 +233,8 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          referral_code?: string | null
+          referrer_id?: string | null
           total_invested?: number
           total_profit?: number
           updated_at?: string
@@ -243,6 +247,8 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          referral_code?: string | null
+          referrer_id?: string | null
           total_invested?: number
           total_profit?: number
           updated_at?: string

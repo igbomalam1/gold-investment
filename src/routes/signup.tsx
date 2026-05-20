@@ -20,6 +20,9 @@ function SignupPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [referralCode, setReferralCode] = useState(() => {
+    return new URLSearchParams(window.location.search).get("ref") || "";
+  });
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -63,6 +66,16 @@ function SignupPage() {
       toast.error(error.message || "Sign up failed");
       return;
     }
+
+    if (data.user?.id && referralCode) {
+      // If it's a UUID (legacy), we can try direct update, else try RPC for short code
+      if (referralCode.length > 20) {
+        await supabase.from("profiles").update({ referrer_id: referralCode }).eq("id", data.user.id);
+      } else {
+        await supabase.rpc("apply_referral_code", { _code: referralCode });
+      }
+    }
+
     toast.success("Account created — welcome to Gold Empire!");
 
     // Fire welcome email (non-blocking)
@@ -130,6 +143,14 @@ function SignupPage() {
             </Field>
             <Field label="Country">
               <CountryPicker value={country} onChange={setCountry} />
+            </Field>
+            <Field label="Referral Code (Optional)">
+              <input
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value)}
+                placeholder="Referrer ID"
+                className={inputCls}
+              />
             </Field>
 
             <button

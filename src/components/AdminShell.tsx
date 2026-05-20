@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, Users, Coins, Wallet, ListChecks, History, LogOut, Loader2 } from "lucide-react";
+import { LayoutDashboard, Users, Coins, Wallet, ListChecks, History, LogOut, Loader2, ArrowUpToLine, Key } from "lucide-react";
 import { useEffect } from "react";
 import { Logo } from "./Logo";
 import { useAuth } from "@/lib/auth";
@@ -8,8 +8,10 @@ const NAV = [
   { to: "/admin", label: "Overview", icon: LayoutDashboard },
   { to: "/admin/users", label: "Users", icon: Users },
   { to: "/admin/deposits", label: "Deposits", icon: ListChecks },
+  { to: "/admin/withdrawals", label: "Payouts", icon: ArrowUpToLine },
   { to: "/admin/plans", label: "Plans", icon: Coins },
   { to: "/admin/wallets", label: "Wallets", icon: Wallet },
+  { to: "/admin/keys", label: "Keys", icon: Key },
   { to: "/admin/history", label: "History", icon: History },
 ];
 
@@ -93,8 +95,8 @@ export function AdminShell() {
         <Outlet />
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border/60 bg-background/95 backdrop-blur-xl lg:hidden">
-        <div className="mx-auto grid max-w-md grid-cols-6">
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border/60 bg-background/95 backdrop-blur-xl lg:hidden overflow-x-auto">
+        <div className="mx-auto flex min-w-max px-2">
           {NAV.map((n) => {
             const active = path === n.to || (n.to !== "/admin" && path.startsWith(n.to));
             return (

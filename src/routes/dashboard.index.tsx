@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  ArrowDownToLine, ArrowUpToLine, Repeat, TrendingUp, Sparkles, ShieldCheck, Loader2,
+  ArrowDownToLine, ArrowUpToLine, Repeat, TrendingUp, Sparkles, ShieldCheck, Loader2, Copy
 } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { DepositModal } from "@/components/dashboard/DepositModal";
 import { WithdrawModal } from "@/components/dashboard/WithdrawModal";
 import { ReinvestModal } from "@/components/dashboard/ReinvestModal";
@@ -99,6 +100,29 @@ function DashboardHome() {
             <ActionButton onClick={() => setModal("withdraw")} icon={ArrowUpToLine} label="Withdraw" />
             <ActionButton onClick={() => setModal("reinvest")} icon={Repeat} label="Reinvest" />
           </div>
+        </div>
+      </div>
+
+      {/* Referral Section */}
+      <div className="rounded-3xl border border-border/60 bg-card/40 p-6 backdrop-blur">
+        <h3 className="font-display text-2xl text-gradient-gold">Invite Friends & Earn</h3>
+        <p className="mt-2 text-sm text-muted-foreground max-w-2xl">
+          Earn $1 for every friend you refer! You'll receive $1 when your friend makes their first investment of $10 or more, and an additional $1 for every subsequent investment they make of $50 or more.
+        </p>
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="flex-1 rounded-xl border border-border bg-background/60 px-4 py-3 font-mono text-sm">
+            {profile ? `${window.location.origin}/signup?ref=${(profile as any).referral_code || profile.id}` : ''}
+          </div>
+          <button 
+            onClick={() => {
+              if (!profile) return;
+              navigator.clipboard.writeText(`${window.location.origin}/signup?ref=${(profile as any).referral_code || profile.id}`);
+              toast.success("Referral link copied!");
+            }}
+            className="flex items-center gap-2 rounded-full bg-gradient-gold px-6 py-3 text-sm font-semibold text-primary-foreground shadow-gold"
+          >
+            <Copy size={16} /> Copy Link
+          </button>
         </div>
       </div>
 

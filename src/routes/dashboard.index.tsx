@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  ArrowDownToLine, ArrowUpToLine, Repeat, TrendingUp, Sparkles, ShieldCheck, Loader2, Copy
+  ArrowDownToLine, ArrowUpToLine, Repeat, TrendingUp, Sparkles, ShieldCheck, Loader2, Copy, Users
 } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
@@ -26,24 +26,57 @@ type Inv = {
   plans: { name: string } | null;
 };
 
+type Referral = {
+  id: string;
+  joined_at: string;
+  masked_identity: string;
+};
+
 function DashboardHome() {
   const { profile, user, refreshProfile } = useAuth();
   const [modal, setModal] = useState<"deposit" | "withdraw" | "reinvest" | null>(null);
   const [investments, setInvestments] = useState<Inv[]>([]);
+  const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(true);
+  const [referralsLoading, setReferralsLoading] = useState(true);
 
   const load = async () => {
-    if (!user) return;
-    const { data } = await supabase
-      .from("investments")
-      .select("id, amount, daily_roi_pct, duration_days, started_at, ends_at, status, plans(name)")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-    setInvestments((data as unknown as Inv[]) || []);
+    if (!user) {
+      setInvestments([]);
+      setReferrals([]);
+      setLoading(false);
+      setReferralsLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setReferralsLoading(true);
+
+    const [{ data: investmentData, error: investmentError }, { data: referralData, error: referralError }] = await Promise.all([
+      supabase
+        .from("investments")
+        .select("id, amount, daily_roi_pct, duration_days, started_at, ends_at, status, plans(name)")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false }),
+      supabase.rpc("get_my_referrals"),
+    ]);
+
+    if (investmentError) {
+      toast.error("We couldn't load your investments right now.");
+      console.error(investmentError);
+    }
+
+    if (referralError) {
+      console.error(referralError);
+    }
+
+    setInvestments((investmentData as unknown as Inv[]) || []);
+    setReferrals(referralData || []);
     setLoading(false);
+    setReferralsLoading(false);
   };
 
-  useEffect(() => { load(); }, [user]);
+  useEffect(() => { void load(); }, [user]);
 
   const onAction = async () => {
     setModal(null);
@@ -57,6 +90,7 @@ function DashboardHome() {
     const elapsed = Math.max(0, (Math.min(Date.now(), end) - start) / 86400000);
     return sum + (Number(i.amount) * Number(i.daily_roi_pct) / 100) * elapsed;
   }, 0);
+  const referralLink = profile ? `${window.location.origin}/signup?ref=${profile.referral_code || profile.id}` : "";
 
   return (
     <div className="space-y-8">
@@ -111,12 +145,12 @@ function DashboardHome() {
         </p>
         <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
           <div className="flex-1 min-w-0 rounded-xl border border-border bg-background/60 px-4 py-3 font-mono text-sm break-all whitespace-normal overflow-x-auto">
-            {profile ? `${window.location.origin}/signup?ref=${(profile as any).referral_code || profile.id}` : ''}
+            {referralLink}
           </div>
           <button 
             onClick={() => {
-              if (!profile) return;
-              navigator.clipboard.writeText(`${window.location.origin}/signup?ref=${(profile as any).referral_code || profile.id}`);
+              if (!referralLink) return;
+              navigator.clipboard.writeText(referralLink);
               toast.success("Referral link copied!");
             }}
             className="w-full rounded-full bg-gradient-gold px-6 py-3 text-sm font-semibold text-primary-foreground shadow-gold sm:w-auto"
@@ -125,6 +159,46 @@ function DashboardHome() {
               <Copy size={16} /> Copy Link
             </span>
           </button>
+        </div>
+        <div className="mt-5 rounded-2xl border border-border/60 bg-background/40 p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                <Users size={16} className="text-primary" /> My downline
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Your referred users are masked for privacy.
+              </p>
+            </div>
+            <div className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+              {formatReferralCount(referrals.length)}
+            </div>
+          </div>
+
+          {referralsLoading ? (
+            <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 size={14} className="animate-spin text-primary" />
+              Loading your downline...
+            </div>
+          ) : referrals.length === 0 ? (
+            <div className="mt-4 rounded-xl border border-dashed border-border/70 px-4 py-3 text-sm text-muted-foreground">
+              No referrals have joined with your link yet.
+            </div>
+          ) : (
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              {referrals.map((referral) => (
+                <div
+                  key={referral.id}
+                  className="rounded-xl border border-border/60 bg-card/50 px-4 py-3"
+                >
+                  <div className="font-medium text-foreground">{referral.masked_identity}</div>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    Joined {formatJoinDate(referral.joined_at)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -212,4 +286,16 @@ function ActionButton({ icon: Icon, label, onClick, primary }: { icon: typeof Ar
       <Icon size={20} /> {label}
     </button>
   );
+}
+
+function formatJoinDate(value: string) {
+  return new Date(value).toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function formatReferralCount(count: number) {
+  return `${count} referral${count === 1 ? "" : "s"}`;
 }

@@ -11,6 +11,8 @@ type Profile = {
   total_invested: number;
   total_profit: number;
   custom_roi_bonus: number;
+  referral_code: string | null;
+  referrer_id: string | null;
 };
 
 type AuthContextValue = {

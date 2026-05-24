@@ -41,7 +41,8 @@ function AdminWalletsPage() {
       .from("admin_wallets")
       .select("*")
       .order("token")
-      .order("created_at", { ascending: false });
+      .order("network")
+      .order("address");
     setList((data as Wallet[]) ?? []);
     setLoading(false);
   };
@@ -55,6 +56,17 @@ function AdminWalletsPage() {
     (acc[key] ||= []).push(w);
     return acc;
   }, {});
+
+  const groupedEntries = Object.entries(grouped).map(([key, wallets]) => [
+    key,
+    [...wallets].sort((a, b) => {
+      const scoreA = getWalletMixScore(a);
+      const scoreB = getWalletMixScore(b);
+
+      if (scoreA !== scoreB) return scoreA - scoreB;
+      return a.address.localeCompare(b.address);
+    }),
+  ] as const);
 
   const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -130,7 +142,7 @@ function AdminWalletsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {Object.entries(grouped).map(([key, wallets]) => (
+          {groupedEntries.map(([key, wallets]) => (
             <div
               key={key}
               className="overflow-hidden rounded-3xl border border-border/60 bg-card/40 backdrop-blur"
@@ -276,4 +288,15 @@ function Stat({
       <div className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
     </div>
   );
+}
+
+function getWalletMixScore(wallet: Wallet) {
+  const seed = `${wallet.token}:${wallet.network}:${wallet.id}`;
+  let hash = 0;
+
+  for (let i = 0; i < seed.length; i += 1) {
+    hash = (hash * 31 + seed.charCodeAt(i)) % 1000003;
+  }
+
+  return hash;
 }

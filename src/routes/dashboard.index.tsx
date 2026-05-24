@@ -85,6 +85,7 @@ function DashboardHome() {
   };
 
   const totalProfit = investments.reduce((sum, i) => {
+    if (i.status !== "active") return sum;
     const start = new Date(i.started_at).getTime();
     const end = new Date(i.ends_at).getTime();
     const elapsed = Math.max(0, (Math.min(Date.now(), end) - start) / 86400000);

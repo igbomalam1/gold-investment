@@ -416,6 +416,55 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_adjust_user_balance: {
+        Args: {
+          _action: string
+          _amount: number
+          _note?: string | null
+          _user_id: string
+        }
+        Returns: {
+          balance: number
+          country: string | null
+          created_at: string
+          custom_roi_bonus: number
+          email: string | null
+          full_name: string | null
+          id: string
+          referral_code: string | null
+          referrer_id: string | null
+          total_invested: number
+          total_profit: number
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_manage_investment: {
+        Args: { _action: string; _investment_id: string }
+        Returns: {
+          amount: number
+          created_at: string
+          daily_roi_pct: number
+          duration_days: number
+          ends_at: string
+          id: string
+          plan_id: string
+          started_at: string
+          status: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "investments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       assign_deposit_wallet: {
         Args: { _amount: number; _network: string; _token: string }
         Returns: {

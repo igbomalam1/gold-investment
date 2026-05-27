@@ -20,16 +20,31 @@ export function RoiSection() {
               Project your <span className="text-gradient-gold">daily returns</span>
             </h2>
             <p className="mt-4 text-muted-foreground">
-              Every plan pays a fixed daily ROI on every trading day. Reinvest your
-              gains in one click and watch wealth compound exponentially.
+              Every plan pays a fixed daily ROI on every trading day. Reinvest your gains in one
+              click and watch wealth compound exponentially.
             </p>
             <div className="mt-8 space-y-4">
               {[
-                { icon: TrendingUp, t: "Daily ROI from 3% to 20%", d: "Higher tier = higher rate." },
-                { icon: Calculator, t: "Fully transparent math", d: "Every credit logged in your history tab." },
-                { icon: Repeat, t: "Reinvest with one tap", d: "Compound profits without re-depositing." },
+                {
+                  icon: TrendingUp,
+                  t: "Daily ROI from 3% to 20%",
+                  d: "Higher tier = higher rate.",
+                },
+                {
+                  icon: Calculator,
+                  t: "Fully transparent math",
+                  d: "Every credit logged in your history tab.",
+                },
+                {
+                  icon: Repeat,
+                  t: "Reinvest with one tap",
+                  d: "Compound profits without re-depositing.",
+                },
               ].map((f) => (
-                <div key={f.t} className="flex items-start gap-4 rounded-2xl border border-border/50 bg-card/50 p-4">
+                <div
+                  key={f.t}
+                  className="flex items-start gap-4 rounded-2xl border border-border/50 bg-card/50 p-4"
+                >
                   <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/15 text-primary">
                     <f.icon size={18} />
                   </div>
@@ -43,8 +58,12 @@ export function RoiSection() {
           </div>
 
           <div className="rounded-3xl glass p-8 shadow-emerald">
-            <div className="text-xs uppercase tracking-wider text-muted-foreground">ROI Calculator</div>
-            <div className="mt-1 font-display text-2xl text-gradient-gold">Estimate your earnings</div>
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">
+              ROI Calculator
+            </div>
+            <div className="mt-1 font-display text-2xl text-gradient-gold">
+              Estimate your earnings
+            </div>
 
             <div className="mt-6 space-y-5">
               <Field label={`Investment amount: $${amount.toLocaleString()}`}>
@@ -89,7 +108,9 @@ export function RoiSection() {
                 { l: "Final balance", v: final },
               ].map((s) => (
                 <div key={s.l} className="rounded-xl bg-background/60 p-3 text-center">
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{s.l}</div>
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    {s.l}
+                  </div>
                   <div className="mt-1 font-display text-lg text-gradient-gold">
                     ${s.v.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                   </div>

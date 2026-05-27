@@ -1,5 +1,16 @@
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, Users, Coins, Wallet, ListChecks, History, LogOut, Loader2, ArrowUpToLine, Key } from "lucide-react";
+import {
+  LayoutDashboard,
+  Users,
+  Coins,
+  Wallet,
+  ListChecks,
+  History,
+  LogOut,
+  Loader2,
+  ArrowUpToLine,
+  Key,
+} from "lucide-react";
 import { useEffect } from "react";
 import { Logo } from "./Logo";
 import { useAuth } from "@/lib/auth";
@@ -36,15 +47,13 @@ export function AdminShell() {
       <div className="grid min-h-screen place-items-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground animate-pulse">
-            Loading secure console...
-          </p>
+          <p className="text-sm text-muted-foreground animate-pulse">Loading secure console...</p>
         </div>
       </div>
     );
   }
 
-  // If we've reached here and still don't have a user or admin rights, 
+  // If we've reached here and still don't have a user or admin rights,
   // the useEffect will handle the redirect. We return null to avoid flashing content.
   if (!user || isAdmin !== true) return null;
 
@@ -107,7 +116,9 @@ export function AdminShell() {
                   active ? "text-primary" : "text-muted-foreground"
                 }`}
               >
-                <div className={`grid h-9 w-9 place-items-center rounded-xl ${active ? "bg-primary/15" : ""}`}>
+                <div
+                  className={`grid h-9 w-9 place-items-center rounded-xl ${active ? "bg-primary/15" : ""}`}
+                >
                   <n.icon size={16} />
                 </div>
                 {n.label}

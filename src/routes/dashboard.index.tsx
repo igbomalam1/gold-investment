@@ -1,7 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  ArrowDownToLine, ArrowUpToLine, Repeat, TrendingUp, Sparkles, ShieldCheck, Loader2, Copy, Users
+  ArrowDownToLine,
+  ArrowUpToLine,
+  Repeat,
+  TrendingUp,
+  Sparkles,
+  ShieldCheck,
+  Loader2,
+  Copy,
+  Users,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
@@ -52,10 +60,15 @@ function DashboardHome() {
     setLoading(true);
     setReferralsLoading(true);
 
-    const [{ data: investmentData, error: investmentError }, { data: referralData, error: referralError }] = await Promise.all([
+    const [
+      { data: investmentData, error: investmentError },
+      { data: referralData, error: referralError },
+    ] = await Promise.all([
       supabase
         .from("investments")
-        .select("id, amount, daily_roi_pct, duration_days, started_at, ends_at, status, plans(name)")
+        .select(
+          "id, amount, daily_roi_pct, duration_days, started_at, ends_at, status, plans(name)",
+        )
         .eq("user_id", user.id)
         .order("created_at", { ascending: false }),
       supabase.rpc("get_my_referrals"),
@@ -76,7 +89,9 @@ function DashboardHome() {
     setReferralsLoading(false);
   };
 
-  useEffect(() => { void load(); }, [user]);
+  useEffect(() => {
+    void load();
+  }, [user]);
 
   const onAction = async () => {
     setModal(null);
@@ -89,16 +104,20 @@ function DashboardHome() {
     const start = new Date(i.started_at).getTime();
     const end = new Date(i.ends_at).getTime();
     const elapsed = Math.max(0, (Math.min(Date.now(), end) - start) / 86400000);
-    return sum + (Number(i.amount) * Number(i.daily_roi_pct) / 100) * elapsed;
+    return sum + ((Number(i.amount) * Number(i.daily_roi_pct)) / 100) * elapsed;
   }, 0);
-  const referralLink = profile ? `${window.location.origin}/signup?ref=${profile.referral_code || profile.id}` : "";
+  const referralLink = profile
+    ? `${window.location.origin}/signup?ref=${profile.referral_code || profile.id}`
+    : "";
 
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-[0.25em] text-primary">Welcome back</p>
-          <h1 className="mt-1 font-display text-3xl lg:text-4xl">{profile?.full_name || "Investor"}</h1>
+          <h1 className="mt-1 font-display text-3xl lg:text-4xl">
+            {profile?.full_name || "Investor"}
+          </h1>
           <div className="mt-1 text-xs text-muted-foreground">
             {profile?.country} · {profile?.email}
           </div>
@@ -131,8 +150,17 @@ function DashboardHome() {
           </div>
 
           <div className="mt-7 grid grid-cols-3 gap-3">
-            <ActionButton onClick={() => setModal("deposit")} icon={ArrowDownToLine} label="Deposit" primary />
-            <ActionButton onClick={() => setModal("withdraw")} icon={ArrowUpToLine} label="Withdraw" />
+            <ActionButton
+              onClick={() => setModal("deposit")}
+              icon={ArrowDownToLine}
+              label="Deposit"
+              primary
+            />
+            <ActionButton
+              onClick={() => setModal("withdraw")}
+              icon={ArrowUpToLine}
+              label="Withdraw"
+            />
             <ActionButton onClick={() => setModal("reinvest")} icon={Repeat} label="Reinvest" />
           </div>
         </div>
@@ -142,13 +170,15 @@ function DashboardHome() {
       <div className="rounded-3xl border border-border/60 bg-card/40 p-6 backdrop-blur">
         <h3 className="font-display text-2xl text-gradient-gold">Invite Friends & Earn</h3>
         <p className="mt-2 text-sm text-muted-foreground max-w-2xl">
-          Earn $1 for every friend you refer! You'll receive $1 when your friend makes their first investment of $10 or more, and an additional $1 for every subsequent investment they make of $50 or more.
+          Earn $1 for every friend you refer! You'll receive $1 when your friend makes their first
+          investment of $10 or more, and an additional $1 for every subsequent investment they make
+          of $50 or more.
         </p>
         <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
           <div className="flex-1 min-w-0 rounded-xl border border-border bg-background/60 px-4 py-3 font-mono text-sm break-all whitespace-normal overflow-x-auto">
             {referralLink}
           </div>
-          <button 
+          <button
             onClick={() => {
               if (!referralLink) return;
               navigator.clipboard.writeText(referralLink);
@@ -209,51 +239,76 @@ function DashboardHome() {
             <h2 className="font-display text-2xl">Active investments</h2>
             <p className="text-sm text-muted-foreground">Your money working across markets.</p>
           </div>
-          <Link to="/dashboard/invest" className="text-sm font-semibold text-primary hover:underline">
+          <Link
+            to="/dashboard/invest"
+            className="text-sm font-semibold text-primary hover:underline"
+          >
             New investment →
           </Link>
         </div>
 
         {loading ? (
-          <div className="mt-5 grid place-items-center py-10"><Loader2 className="animate-spin text-primary" /></div>
-        ) : investments.filter(i => i.status === "active").length === 0 ? (
+          <div className="mt-5 grid place-items-center py-10">
+            <Loader2 className="animate-spin text-primary" />
+          </div>
+        ) : investments.filter((i) => i.status === "active").length === 0 ? (
           <div className="mt-5 rounded-3xl border border-border/60 bg-card/40 p-10 text-center text-sm text-muted-foreground">
-            No active investments yet. <Link to="/dashboard/invest" className="text-primary font-semibold">Start your first plan →</Link>
+            No active investments yet.{" "}
+            <Link to="/dashboard/invest" className="text-primary font-semibold">
+              Start your first plan →
+            </Link>
           </div>
         ) : (
           <div className="mt-5 grid gap-4 lg:grid-cols-2">
-            {investments.filter((i) => i.status === "active").map((inv) => {
-              const start = new Date(inv.started_at).getTime();
-              const elapsedDays = Math.max(0, (Date.now() - start) / 86400000);
-              const earned = (Number(inv.amount) * Number(inv.daily_roi_pct) / 100) * elapsedDays;
-              const progress = Math.min(100, (elapsedDays / inv.duration_days) * 100);
-              return (
-                <div key={inv.id} className="rounded-3xl border border-border/60 bg-card/60 p-6 backdrop-blur">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-xs uppercase tracking-wider text-muted-foreground">{inv.plans?.name} plan</div>
-                      <div className="mt-1 font-display text-2xl text-gradient-gold">{formatCurrency(inv.amount)}</div>
+            {investments
+              .filter((i) => i.status === "active")
+              .map((inv) => {
+                const start = new Date(inv.started_at).getTime();
+                const elapsedDays = Math.max(0, (Date.now() - start) / 86400000);
+                const earned =
+                  ((Number(inv.amount) * Number(inv.daily_roi_pct)) / 100) * elapsedDays;
+                const progress = Math.min(100, (elapsedDays / inv.duration_days) * 100);
+                return (
+                  <div
+                    key={inv.id}
+                    className="rounded-3xl border border-border/60 bg-card/60 p-6 backdrop-blur"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                          {inv.plans?.name} plan
+                        </div>
+                        <div className="mt-1 font-display text-2xl text-gradient-gold">
+                          {formatCurrency(inv.amount)}
+                        </div>
+                      </div>
+                      <div className="rounded-full bg-success/15 px-3 py-1 text-xs font-semibold text-success">
+                        +{inv.daily_roi_pct}% / day
+                      </div>
                     </div>
-                    <div className="rounded-full bg-success/15 px-3 py-1 text-xs font-semibold text-success">
-                      +{inv.daily_roi_pct}% / day
+                    <div className="mt-5">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>Earned so far</span>
+                        <span className="font-mono font-semibold text-success">
+                          +{formatCurrency(earned)}
+                        </span>
+                      </div>
+                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-background/60">
+                        <div
+                          className="h-full rounded-full bg-gradient-gold shimmer"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                      <div className="mt-1.5 flex justify-between text-[10px] uppercase tracking-wider text-muted-foreground">
+                        <span>
+                          Day {Math.floor(elapsedDays)} / {inv.duration_days}
+                        </span>
+                        <span>{progress.toFixed(0)}%</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="mt-5">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>Earned so far</span>
-                      <span className="font-mono font-semibold text-success">+{formatCurrency(earned)}</span>
-                    </div>
-                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-background/60">
-                      <div className="h-full rounded-full bg-gradient-gold shimmer" style={{ width: `${progress}%` }} />
-                    </div>
-                    <div className="mt-1.5 flex justify-between text-[10px] uppercase tracking-wider text-muted-foreground">
-                      <span>Day {Math.floor(elapsedDays)} / {inv.duration_days}</span>
-                      <span>{progress.toFixed(0)}%</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
         )}
       </section>
@@ -269,12 +324,24 @@ function Stat({ label, value, positive }: { label: string; value: string; positi
   return (
     <div className="rounded-xl bg-background/40 px-3 py-2.5">
       <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className={`mt-0.5 font-mono text-sm font-semibold ${positive ? "text-success" : ""}`}>{value}</div>
+      <div className={`mt-0.5 font-mono text-sm font-semibold ${positive ? "text-success" : ""}`}>
+        {value}
+      </div>
     </div>
   );
 }
 
-function ActionButton({ icon: Icon, label, onClick, primary }: { icon: typeof ArrowDownToLine; label: string; onClick: () => void; primary?: boolean }) {
+function ActionButton({
+  icon: Icon,
+  label,
+  onClick,
+  primary,
+}: {
+  icon: typeof ArrowDownToLine;
+  label: string;
+  onClick: () => void;
+  primary?: boolean;
+}) {
   return (
     <button
       onClick={onClick}

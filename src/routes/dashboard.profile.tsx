@@ -15,7 +15,7 @@ export const Route = createFileRoute("/dashboard/profile")({
 function ProfilePage() {
   const { profile, user, loading, refreshProfile } = useAuth();
   const [uploading, setUploading] = useState(false);
-  
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       setUploading(true);
@@ -23,23 +23,21 @@ function ProfilePage() {
       if (!user) return;
 
       const file = e.target.files[0];
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split(".").pop();
       const filePath = `${user.id}/${Math.random()}.${fileExt}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file);
+      const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(filePath);
 
       const { error: updateError } = await supabase
-        .from('profiles')
+        .from("profiles")
         .update({ avatar_url: publicUrl })
-        .eq('id', user.id);
+        .eq("id", user.id);
 
       if (updateError) throw updateError;
 
@@ -60,7 +58,6 @@ function ProfilePage() {
       </div>
     );
   }
-
 
   return (
     <div className="space-y-6">
@@ -86,13 +83,17 @@ function ProfilePage() {
                   className="hidden"
                 />
                 <label htmlFor="avatar-upload" className="block relative cursor-pointer group">
-                  <img 
-                    src={profile.avatar_url || defaultAvatar} 
-                    alt="Profile" 
+                  <img
+                    src={profile.avatar_url || defaultAvatar}
+                    alt="Profile"
                     className="h-24 w-24 rounded-full border-2 border-gold object-cover shadow-gold transition-opacity group-hover:opacity-60"
                   />
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    {uploading ? <Loader2 className="animate-spin text-white" /> : <Camera className="text-white" />}
+                    {uploading ? (
+                      <Loader2 className="animate-spin text-white" />
+                    ) : (
+                      <Camera className="text-white" />
+                    )}
                   </div>
                 </label>
                 <div className="absolute -bottom-1 -right-1 rounded-full bg-success p-1 text-success-foreground ring-4 ring-card shadow-sm">
@@ -117,12 +118,14 @@ function ProfilePage() {
 
         <div className="rounded-3xl bg-gradient-gold p-1 shadow-gold">
           <div className="h-full rounded-[calc(1.5rem-4px)] bg-card/80 p-8 backdrop-blur-xl flex flex-col justify-center">
-            <div className="text-xs font-bold uppercase tracking-[0.2em] text-primary">Total Available Balance</div>
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
+              Total Available Balance
+            </div>
             <div className="mt-2 font-display text-4xl lg:text-5xl text-gradient-gold">
               {formatCurrency(profile.balance)}
             </div>
             <div className="mt-4 flex items-center gap-2 text-xs text-success">
-              <ArrowUpRight size={14} /> 
+              <ArrowUpRight size={14} />
               <span>+3.2% from yesterday</span>
             </div>
           </div>
@@ -133,12 +136,23 @@ function ProfilePage() {
         {[
           { icon: Mail, label: "Email Address", value: profile.email || "—" },
           { icon: Globe, label: "Country / Region", value: profile.country || "—" },
-          { icon: Wallet, label: "Total Invested Capital", value: formatCurrency(profile.total_invested) },
+          {
+            icon: Wallet,
+            label: "Total Invested Capital",
+            value: formatCurrency(profile.total_invested),
+          },
         ].map((f) => (
-          <div key={f.label} className="flex items-center gap-4 rounded-2xl border border-border/60 bg-card/40 p-5 backdrop-blur transition-all hover:border-primary/40">
-            <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary shadow-sm"><f.icon size={20} /></div>
+          <div
+            key={f.label}
+            className="flex items-center gap-4 rounded-2xl border border-border/60 bg-card/40 p-5 backdrop-blur transition-all hover:border-primary/40"
+          >
+            <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary shadow-sm">
+              <f.icon size={20} />
+            </div>
             <div>
-              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{f.label}</div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                {f.label}
+              </div>
               <div className="mt-0.5 text-base font-semibold">{f.value}</div>
             </div>
           </div>

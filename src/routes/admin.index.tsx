@@ -44,11 +44,7 @@ function AdminHome() {
           .select("id", { count: "exact", head: true })
           .eq("status", "active"),
         supabase.from("deposits").select("id").eq("status", "pending"),
-        supabase
-          .from("deposits")
-          .select("*")
-          .order("created_at", { ascending: false })
-          .limit(5),
+        supabase.from("deposits").select("*").order("created_at", { ascending: false }).limit(5),
       ]);
 
       const aum =
@@ -96,11 +92,7 @@ function AdminHome() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi label="Total users" value={stats.users.toString()} icon={Users} />
-        <Kpi
-          label="Assets under management"
-          value={formatCurrency(stats.aum)}
-          icon={Wallet}
-        />
+        <Kpi label="Assets under management" value={formatCurrency(stats.aum)} icon={Wallet} />
         <Kpi
           label="Active investments"
           value={stats.activeInvestments.toString()}
@@ -150,10 +142,7 @@ function AdminHome() {
               </div>
             ) : (
               recent.map((d) => (
-                <div
-                  key={d.id}
-                  className="flex items-center justify-between gap-3 px-5 py-4"
-                >
+                <div key={d.id} className="flex items-center justify-between gap-3 px-5 py-4">
                   <div>
                     <div className="text-sm font-semibold">
                       {d.profile?.full_name || "Unknown user"}

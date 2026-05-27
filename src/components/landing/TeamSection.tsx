@@ -6,14 +6,43 @@ import marco from "@/assets/team/marco.png";
 import eleanor from "@/assets/team/eleanor.png";
 
 const TEAM = [
-  { name: "Adrien Rousseau", role: "CEO & Co-founder", bio: "Ex-Goldman Sachs commodities desk, 14 yrs.", image: adrien },
-  { name: "Hannah Vogel", role: "Chief Investment Officer", bio: "Former BlackRock multi-asset PM.", image: hannah },
-  { name: "Kenji Watanabe", role: "Head of Crypto Trading", bio: "Built Tokyo's largest OTC desk.", image: kenji },
-  { name: "Sade Adebayo", role: "Head of Risk", bio: "Quant lead, 10+ yrs across HSBC & Citadel.", image: sade },
-  { name: "Marco Bianchi", role: "Chief Technology Officer", bio: "Architect at Coinbase Custody.", image: marco },
-  { name: "Eleanor Hayes", role: "Head of Compliance", bio: "Former FCA senior officer, London.", image: eleanor },
+  {
+    name: "Adrien Rousseau",
+    role: "CEO & Co-founder",
+    bio: "Ex-Goldman Sachs commodities desk, 14 yrs.",
+    image: adrien,
+  },
+  {
+    name: "Hannah Vogel",
+    role: "Chief Investment Officer",
+    bio: "Former BlackRock multi-asset PM.",
+    image: hannah,
+  },
+  {
+    name: "Kenji Watanabe",
+    role: "Head of Crypto Trading",
+    bio: "Built Tokyo's largest OTC desk.",
+    image: kenji,
+  },
+  {
+    name: "Sade Adebayo",
+    role: "Head of Risk",
+    bio: "Quant lead, 10+ yrs across HSBC & Citadel.",
+    image: sade,
+  },
+  {
+    name: "Marco Bianchi",
+    role: "Chief Technology Officer",
+    bio: "Architect at Coinbase Custody.",
+    image: marco,
+  },
+  {
+    name: "Eleanor Hayes",
+    role: "Head of Compliance",
+    bio: "Former FCA senior officer, London.",
+    image: eleanor,
+  },
 ];
-
 
 export function TeamSection() {
   return (

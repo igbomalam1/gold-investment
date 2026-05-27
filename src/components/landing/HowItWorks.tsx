@@ -1,10 +1,26 @@
 import { UserPlus, Wallet, LineChart, Coins } from "lucide-react";
 
 const STEPS = [
-  { icon: UserPlus, title: "Create Account", text: "Sign up in 60 seconds. No paperwork. Pick your country, verify your email." },
-  { icon: Wallet, title: "Fund with Crypto", text: "Deposit BTC, ETH, USDT, BNB, TRX or TON. Your wallet, your custody, instant credit." },
-  { icon: Coins, title: "Choose a Plan", text: "Pick from Silver to Diamond. Our desk allocates across gold, crypto and forex." },
-  { icon: LineChart, title: "Earn Daily ROI", text: "Watch profits credit every trading day. Withdraw or compound — your call." },
+  {
+    icon: UserPlus,
+    title: "Create Account",
+    text: "Sign up in 60 seconds. No paperwork. Pick your country, verify your email.",
+  },
+  {
+    icon: Wallet,
+    title: "Fund with Crypto",
+    text: "Deposit BTC, ETH, USDT, BNB, TRX or TON. Your wallet, your custody, instant credit.",
+  },
+  {
+    icon: Coins,
+    title: "Choose a Plan",
+    text: "Pick from Silver to Diamond. Our desk allocates across gold, crypto and forex.",
+  },
+  {
+    icon: LineChart,
+    title: "Earn Daily ROI",
+    text: "Watch profits credit every trading day. Withdraw or compound — your call.",
+  },
 ];
 
 export function HowItWorks() {

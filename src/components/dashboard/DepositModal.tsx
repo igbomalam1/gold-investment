@@ -84,7 +84,10 @@ export function DepositModal({ onClose }: { onClose: () => void }) {
             {DEPOSIT_TOKENS.map((t) => (
               <button
                 key={t.symbol}
-                onClick={() => { setToken(t.symbol); setStep("network"); }}
+                onClick={() => {
+                  setToken(t.symbol);
+                  setStep("network");
+                }}
                 className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-3 text-left hover:border-primary"
               >
                 <div>
@@ -110,11 +113,17 @@ export function DepositModal({ onClose }: { onClose: () => void }) {
                 className="flex w-full items-center justify-between rounded-xl border border-border bg-background/40 p-3 hover:border-primary disabled:opacity-60"
               >
                 <span className="text-sm font-medium">{n}</span>
-                {loading ? <Loader2 size={14} className="animate-spin" /> : <ChevronRight size={14} className="text-muted-foreground" />}
+                {loading ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <ChevronRight size={14} className="text-muted-foreground" />
+                )}
               </button>
             ))}
           </div>
-          <button onClick={() => setStep("token")} className="mt-3 text-xs text-muted-foreground">← Change token</button>
+          <button onClick={() => setStep("token")} className="mt-3 text-xs text-muted-foreground">
+            ← Change token
+          </button>
         </>
       )}
 
@@ -122,13 +131,19 @@ export function DepositModal({ onClose }: { onClose: () => void }) {
         <>
           <div className="rounded-2xl bg-gradient-emerald p-1">
             <div className="rounded-[calc(1rem-4px)] bg-card/90 p-5 text-center">
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Send exactly</div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                Send exactly
+              </div>
               <div className="mt-1 font-display text-3xl text-gradient-gold">${amount}</div>
-              <div className="mt-1 text-xs">in <b>{token}</b> on <b>{network}</b></div>
+              <div className="mt-1 text-xs">
+                in <b>{token}</b> on <b>{network}</b>
+              </div>
 
               <div className="mt-5">
                 <div className="rounded-xl border border-border bg-background/60 p-3 text-left">
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Wallet address</div>
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Wallet address
+                  </div>
                   <div className="mt-1 break-all font-mono text-xs">{address}</div>
                 </div>
                 <button
@@ -166,13 +181,24 @@ export function DepositModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-function Modal({ children, onClose, title }: { children: React.ReactNode; onClose: () => void; title: string }) {
+function Modal({
+  children,
+  onClose,
+  title,
+}: {
+  children: React.ReactNode;
+  onClose: () => void;
+  title: string;
+}) {
   return (
     <div className="fixed inset-0 z-[80] flex items-end justify-center bg-background/70 p-4 backdrop-blur sm:items-center">
       <div className="w-full max-w-md rounded-3xl border border-border bg-card p-6 shadow-emerald animate-scale-in">
         <div className="flex items-center justify-between">
           <h3 className="font-display text-2xl">{title}</h3>
-          <button onClick={onClose} className="grid h-9 w-9 place-items-center rounded-full hover:bg-accent">
+          <button
+            onClick={onClose}
+            className="grid h-9 w-9 place-items-center rounded-full hover:bg-accent"
+          >
             <X size={16} />
           </button>
         </div>

@@ -44,7 +44,9 @@ function AdminWithdrawalsPage() {
         .select("id, full_name, email")
         .in("id", ids);
       const map = new Map((profs ?? []).map((p) => [p.id, p]));
-      setItems(wds.map((w) => ({ ...w, profile: map.get(w.user_id) ?? undefined })) as Withdrawal[]);
+      setItems(
+        wds.map((w) => ({ ...w, profile: map.get(w.user_id) ?? undefined })) as Withdrawal[],
+      );
     } else {
       setItems([]);
     }
@@ -67,9 +69,9 @@ function AdminWithdrawalsPage() {
   const review = async (d: Withdrawal, action: "approve" | "reject") => {
     setActionId(d.id);
     const { error } = await supabase.rpc("admin_review_withdrawal", {
-        _id: d.id,
-        _approve: action === "approve",
-        _reason: action === "reject" ? "Withdrawal rejected by admin." : undefined,
+      _id: d.id,
+      _approve: action === "approve",
+      _reason: action === "reject" ? "Withdrawal rejected by admin." : undefined,
     });
     setActionId(null);
     if (error) return toast.error(error.message);
@@ -131,9 +133,7 @@ function AdminWithdrawalsPage() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 text-sm">
                     <span className="font-semibold">{d.profile?.full_name || "Unknown user"}</span>
-                    <span className="text-[11px] text-muted-foreground">
-                      · {d.profile?.email}
-                    </span>
+                    <span className="text-[11px] text-muted-foreground">· {d.profile?.email}</span>
                   </div>
                   <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
                     <span>{formatDateTime(d.created_at)}</span>

@@ -34,11 +34,7 @@ function AdminHistoryPage() {
     (async () => {
       const [{ data: deps }, { data: wds }, { data: invs }, { count: usersCount }] =
         await Promise.all([
-          supabase
-            .from("deposits")
-            .select("*")
-            .order("created_at", { ascending: false })
-            .limit(50),
+          supabase.from("deposits").select("*").order("created_at", { ascending: false }).limit(50),
           supabase
             .from("withdrawals")
             .select("*")

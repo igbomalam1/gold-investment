@@ -41,7 +41,9 @@ export function DashboardShell() {
     <div className="min-h-screen pb-24 lg:pb-0">
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:px-8">
-          <Link to="/dashboard"><Logo size={36} withText={false} /></Link>
+          <Link to="/dashboard">
+            <Logo size={36} withText={false} />
+          </Link>
           <div className="hidden items-center gap-1 lg:flex">
             {NAV.map((n) => {
               const active = path === n.to || (n.to !== "/dashboard" && path.startsWith(n.to));
@@ -87,7 +89,9 @@ export function DashboardShell() {
                   active ? "text-primary" : "text-muted-foreground"
                 }`}
               >
-                <div className={`grid h-10 w-10 place-items-center rounded-2xl transition-all ${active ? "bg-primary/15" : ""}`}>
+                <div
+                  className={`grid h-10 w-10 place-items-center rounded-2xl transition-all ${active ? "bg-primary/15" : ""}`}
+                >
                   <n.icon size={18} />
                 </div>
                 {n.label}

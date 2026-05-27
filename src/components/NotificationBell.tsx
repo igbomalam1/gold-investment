@@ -19,7 +19,7 @@ export function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
-  
+
   const fetchNotifications = async () => {
     if (!user) return;
     try {
@@ -45,7 +45,7 @@ export function NotificationBell() {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user?.id}` },
-        () => fetchNotifications()
+        () => fetchNotifications(),
       )
       .subscribe();
 
@@ -54,7 +54,7 @@ export function NotificationBell() {
     };
   }, [user]);
 
-  const unreadCount = notifications.filter(n => !n.is_read).length;
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   const markAllAsRead = async () => {
     if (!user) return;
@@ -67,7 +67,7 @@ export function NotificationBell() {
         .eq("is_read", false);
 
       if (error) throw error;
-      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
       toast.success("All caught up!");
     } catch (error) {
       toast.error("Failed to mark as read");
@@ -78,25 +78,25 @@ export function NotificationBell() {
 
   const deleteNotification = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from("notifications")
-        .delete()
-        .eq("id", id);
+      const { error } = await supabase.from("notifications").delete().eq("id", id);
 
       if (error) throw error;
-      setNotifications(prev => prev.filter(n => n.id !== id));
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
     } catch (error) {
       toast.error("Failed to delete notification");
     }
   };
 
-
   const getIcon = (type: string) => {
     switch (type) {
-      case "success": return <CheckCircle size={16} className="text-success" />;
-      case "warning": return <AlertTriangle size={16} className="text-warning" />;
-      case "error": return <AlertCircle size={16} className="text-destructive" />;
-      default: return <Info size={16} className="text-primary" />;
+      case "success":
+        return <CheckCircle size={16} className="text-success" />;
+      case "warning":
+        return <AlertTriangle size={16} className="text-warning" />;
+      case "error":
+        return <AlertCircle size={16} className="text-destructive" />;
+      default:
+        return <Info size={16} className="text-primary" />;
     }
   };
 
@@ -116,7 +116,7 @@ export function NotificationBell() {
 
       {open && (
         <>
-          <div 
+          <div
             className="fixed inset-0 z-40 bg-background/20 backdrop-blur-sm lg:absolute lg:inset-auto lg:-right-4 lg:top-14 lg:w-96 lg:bg-transparent"
             onClick={() => setOpen(false)}
           />
@@ -126,14 +126,17 @@ export function NotificationBell() {
                 <h3 className="font-display text-lg">Notifications</h3>
                 <div className="flex items-center gap-2">
                   {unreadCount > 0 && (
-                    <button 
+                    <button
                       onClick={markAllAsRead}
                       className="text-[10px] font-bold uppercase tracking-wider text-primary hover:underline"
                     >
                       Mark all read
                     </button>
                   )}
-                  <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">
+                  <button
+                    onClick={() => setOpen(false)}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
                     <X size={18} />
                   </button>
                 </div>
@@ -148,16 +151,20 @@ export function NotificationBell() {
                 ) : (
                   <div className="space-y-2 py-2">
                     {notifications.map((n) => (
-                      <div 
+                      <div
                         key={n.id}
                         className={`group relative flex gap-3 rounded-2xl p-3 transition-colors ${
-                          n.is_read ? "bg-background/20 opacity-70" : "bg-primary/5 ring-1 ring-primary/10"
+                          n.is_read
+                            ? "bg-background/20 opacity-70"
+                            : "bg-primary/5 ring-1 ring-primary/10"
                         }`}
                       >
                         <div className="mt-1 h-fit shrink-0">{getIcon(n.type)}</div>
                         <div className="flex-1">
                           <div className="flex items-start justify-between gap-2">
-                            <h4 className={`text-sm font-semibold leading-tight ${n.is_read ? "text-foreground/80" : "text-foreground"}`}>
+                            <h4
+                              className={`text-sm font-semibold leading-tight ${n.is_read ? "text-foreground/80" : "text-foreground"}`}
+                            >
                               {n.title}
                             </h4>
                             <span className="shrink-0 text-[10px] text-muted-foreground">
@@ -168,7 +175,7 @@ export function NotificationBell() {
                             {n.message}
                           </p>
                         </div>
-                        <button 
+                        <button
                           onClick={(e) => {
                             e.stopPropagation();
                             deleteNotification(n.id);

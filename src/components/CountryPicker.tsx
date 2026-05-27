@@ -14,9 +14,10 @@ export function CountryPicker({ value, onChange }: Props) {
   const selected = COUNTRIES.find((c) => c.code === value);
   const filtered = useMemo(
     () =>
-      COUNTRIES.filter((c) =>
-        c.name.toLowerCase().includes(q.toLowerCase()) ||
-        c.code.toLowerCase().includes(q.toLowerCase()),
+      COUNTRIES.filter(
+        (c) =>
+          c.name.toLowerCase().includes(q.toLowerCase()) ||
+          c.code.toLowerCase().includes(q.toLowerCase()),
       ),
     [q],
   );
@@ -70,7 +71,9 @@ export function CountryPicker({ value, onChange }: Props) {
               </button>
             ))}
             {filtered.length === 0 && (
-              <div className="px-3 py-6 text-center text-xs text-muted-foreground">No country found</div>
+              <div className="px-3 py-6 text-center text-xs text-muted-foreground">
+                No country found
+              </div>
             )}
           </div>
         </div>

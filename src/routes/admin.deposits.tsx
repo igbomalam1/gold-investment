@@ -134,9 +134,7 @@ function AdminDepositsPage() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 text-sm">
                     <span className="font-semibold">{d.profile?.full_name || "Unknown user"}</span>
-                    <span className="text-[11px] text-muted-foreground">
-                      · {d.profile?.email}
-                    </span>
+                    <span className="text-[11px] text-muted-foreground">· {d.profile?.email}</span>
                   </div>
                   <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
                     <span>{formatDateTime(d.created_at)}</span>

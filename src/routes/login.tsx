@@ -52,9 +52,7 @@ function LoginPage() {
 
         <div className="mt-8 rounded-3xl glass p-7 shadow-emerald">
           <h1 className="font-display text-3xl">Welcome back</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Sign in to access your portfolio.
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Sign in to access your portfolio.</p>
 
           <form onSubmit={onSubmit} className="mt-6 space-y-4">
             <div>
@@ -88,7 +86,10 @@ function LoginPage() {
                 </button>
               </div>
               <div className="mt-2 text-right">
-                <Link to="/forgot-password" className="text-xs font-medium text-primary hover:underline">
+                <Link
+                  to="/forgot-password"
+                  className="text-xs font-medium text-primary hover:underline"
+                >
                   Forgot Password?
                 </Link>
               </div>

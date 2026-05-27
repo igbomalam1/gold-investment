@@ -23,8 +23,8 @@ export function PlansSection() {
             Choose your <span className="text-gradient-gold">tier of wealth</span>
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Eight tiers from $10 to $1M. The higher the tier, the higher the daily ROI —
-            backed by gold, traded across crypto and forex on every market day.
+            Eight tiers from $10 to $1M. The higher the tier, the higher the daily ROI — backed by
+            gold, traded across crypto and forex on every market day.
           </p>
         </div>
 
@@ -34,10 +34,14 @@ export function PlansSection() {
               key={p.id}
               className="group relative overflow-hidden rounded-3xl border border-border/60 bg-card/60 p-6 backdrop-blur transition-all hover:-translate-y-1 hover:border-primary/50 hover:shadow-gold"
             >
-              <div className={`absolute inset-x-0 top-0 h-32 bg-gradient-to-b ${ACCENT_RING[p.accent]} opacity-60`} />
+              <div
+                className={`absolute inset-x-0 top-0 h-32 bg-gradient-to-b ${ACCENT_RING[p.accent]} opacity-60`}
+              />
               <div className="relative">
                 <div className="flex items-center justify-between">
-                  <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">{p.tier}</div>
+                  <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+                    {p.tier}
+                  </div>
                   {p.tier === "Royal" && <Crown size={16} className="text-primary" />}
                 </div>
                 <h3 className="mt-2 font-display text-3xl text-gradient-gold">{p.name}</h3>

@@ -16,17 +16,16 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-
-
             <h1 className="mt-6 font-display text-5xl leading-[1.05] tracking-tight text-foreground sm:text-6xl lg:text-7xl">
-              Where <span className="text-gradient-gold">Wealth</span><br />
+              Where <span className="text-gradient-gold">Wealth</span>
+              <br />
               Compounds Daily.
             </h1>
 
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-              An institutional-grade investment platform turning gold, crypto, and
-              forex markets into <span className="text-primary font-semibold">3% — 20% daily ROI</span>.
-              From $10 to $1,000,000. Total transparency, every trading day.
+              An institutional-grade investment platform turning gold, crypto, and forex markets
+              into <span className="text-primary font-semibold">3% — 20% daily ROI</span>. From $10
+              to $1,000,000. Total transparency, every trading day.
             </p>
 
             <div className="mt-9 flex flex-wrap items-center gap-4">
@@ -50,9 +49,14 @@ export function Hero() {
                 { v: "84k+", l: "Investors" },
                 { v: "194", l: "Countries" },
               ].map((s) => (
-                <div key={s.l} className="rounded-2xl border border-border/60 bg-card/40 p-4 backdrop-blur">
+                <div
+                  key={s.l}
+                  className="rounded-2xl border border-border/60 bg-card/40 p-4 backdrop-blur"
+                >
                   <div className="font-display text-2xl text-gradient-gold">{s.v}</div>
-                  <div className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">{s.l}</div>
+                  <div className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">
+                    {s.l}
+                  </div>
                 </div>
               ))}
             </div>
@@ -69,7 +73,9 @@ export function Hero() {
             <div className="relative rounded-[2rem] glass p-7 shadow-emerald float">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground">Portfolio Value</div>
+                  <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                    Portfolio Value
+                  </div>
                   <div className="mt-1 font-display text-4xl text-gradient-gold">$248,650.40</div>
                 </div>
                 <div className="rounded-full bg-success/15 px-3 py-1 text-xs font-semibold text-success">
@@ -84,7 +90,10 @@ export function Hero() {
                   { name: "Ethereum", v: "$42,800", c: "+3.2%" },
                   { name: "Forex EUR/USD", v: "$35,200", c: "+1.0%" },
                 ].map((a) => (
-                  <div key={a.name} className="rounded-xl border border-border/60 bg-background/50 p-3">
+                  <div
+                    key={a.name}
+                    className="rounded-xl border border-border/60 bg-background/50 p-3"
+                  >
                     <div className="text-[11px] text-muted-foreground">{a.name}</div>
                     <div className="mt-1 text-sm font-semibold">{a.v}</div>
                     <div className="text-[10px] text-success">{a.c}</div>

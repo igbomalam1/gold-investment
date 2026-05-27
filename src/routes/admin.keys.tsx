@@ -28,7 +28,7 @@ function AdminKeysPage() {
       .from("reset_keys")
       .select("*")
       .order("created_at", { ascending: false });
-    
+
     if (data) {
       setKeys(data as ResetKey[]);
     }

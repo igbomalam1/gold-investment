@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as PromoRouteImport } from './routes/promo'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -32,6 +33,11 @@ import { Route as AdminDepositsRouteImport } from './routes/admin.deposits'
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PromoRoute = PromoRouteImport.update({
+  id: '/promo',
+  path: '/promo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/promo': typeof PromoRoute
   '/signup': typeof SignupRoute
   '/admin/deposits': typeof AdminDepositsRoute
   '/admin/history': typeof AdminHistoryRoute
@@ -150,6 +157,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/promo': typeof PromoRoute
   '/signup': typeof SignupRoute
   '/admin/deposits': typeof AdminDepositsRoute
   '/admin/history': typeof AdminHistoryRoute
@@ -172,6 +180,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/promo': typeof PromoRoute
   '/signup': typeof SignupRoute
   '/admin/deposits': typeof AdminDepositsRoute
   '/admin/history': typeof AdminHistoryRoute
@@ -195,6 +204,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-password'
     | '/login'
+    | '/promo'
     | '/signup'
     | '/admin/deposits'
     | '/admin/history'
@@ -214,6 +224,7 @@ export interface FileRouteTypes {
     | '/'
     | '/forgot-password'
     | '/login'
+    | '/promo'
     | '/signup'
     | '/admin/deposits'
     | '/admin/history'
@@ -235,6 +246,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-password'
     | '/login'
+    | '/promo'
     | '/signup'
     | '/admin/deposits'
     | '/admin/history'
@@ -257,6 +269,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  PromoRoute: typeof PromoRoute
   SignupRoute: typeof SignupRoute
   ApiSendEmailRoute: typeof ApiSendEmailRoute
 }
@@ -268,6 +281,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/promo': {
+      id: '/promo'
+      path: '/promo'
+      fullPath: '/promo'
+      preLoaderRoute: typeof PromoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -447,6 +467,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  PromoRoute: PromoRoute,
   SignupRoute: SignupRoute,
   ApiSendEmailRoute: ApiSendEmailRoute,
 }

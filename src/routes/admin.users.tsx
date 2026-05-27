@@ -74,7 +74,9 @@ function AdminUsersPage() {
     }
 
     setUsers((profiles as Profile[]) ?? []);
-    setAdminIds(new Set((roles ?? []).filter((role) => role.role === "admin").map((role) => role.user_id)));
+    setAdminIds(
+      new Set((roles ?? []).filter((role) => role.role === "admin").map((role) => role.user_id)),
+    );
     setLoading(false);
   };
 
@@ -87,7 +89,9 @@ function AdminUsersPage() {
     ] = await Promise.all([
       supabase
         .from("investments")
-        .select("id, amount, created_at, daily_roi_pct, duration_days, ends_at, started_at, status, plans(name)")
+        .select(
+          "id, amount, created_at, daily_roi_pct, duration_days, ends_at, started_at, status, plans(name)",
+        )
         .eq("user_id", userId)
         .order("created_at", { ascending: false }),
       supabase.from("deposits").select("id", { count: "exact", head: true }).eq("user_id", userId),
@@ -144,9 +148,13 @@ function AdminUsersPage() {
     );
   });
 
-  const currentInvestments = userInvestments.filter((investment) => investment.status !== "completed");
+  const currentInvestments = userInvestments.filter(
+    (investment) => investment.status !== "completed",
+  );
   const completedInvestments = userInvestments.length - currentInvestments.length;
-  const activeInvestments = userInvestments.filter((investment) => investment.status === "active").length;
+  const activeInvestments = userInvestments.filter(
+    (investment) => investment.status === "active",
+  ).length;
   const suspendedInvestments = userInvestments.filter(
     (investment) => investment.status === "suspended",
   ).length;
@@ -326,11 +334,7 @@ function AdminUsersPage() {
                   <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-3 lg:min-w-[460px]">
                     <InlineDetail label="Country" value={user.country || "-"} />
                     <InlineDetail label="Joined" value={formatDateTime(user.created_at)} />
-                    <InlineDetail
-                      label="Balance"
-                      value={formatCurrency(user.balance)}
-                      emphasized
-                    />
+                    <InlineDetail label="Balance" value={formatCurrency(user.balance)} emphasized />
                   </div>
 
                   <div className="text-sm font-semibold text-primary">Open details</div>
@@ -472,7 +476,8 @@ function AdminUsersPage() {
                     <div className="mt-5 rounded-2xl border border-destructive/30 bg-destructive/5 p-4">
                       <div className="text-sm font-semibold text-foreground">Danger zone</div>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        Deleting the profile removes this record from the app, but not the auth account.
+                        Deleting the profile removes this record from the app, but not the auth
+                        account.
                       </p>
                       <button
                         type="button"
@@ -601,7 +606,8 @@ function AdminUsersPage() {
                   {balanceAction === "credit" ? "Credit user balance" : "Debit user balance"}
                 </h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  This updates {activeUser.full_name || activeUser.email || "this user"} immediately.
+                  This updates {activeUser.full_name || activeUser.email || "this user"}{" "}
+                  immediately.
                 </p>
               </div>
               <button
@@ -658,15 +664,7 @@ function AdminUsersPage() {
 const inputCls =
   "mt-1.5 w-full rounded-xl border border-border bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary";
 
-function SummaryCard({
-  label,
-  value,
-  sub,
-}: {
-  label: string;
-  value: string;
-  sub: string;
-}) {
+function SummaryCard({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
     <div className="rounded-3xl border border-border/60 bg-card/60 p-5 backdrop-blur">
       <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
@@ -696,15 +694,7 @@ function SectionCard({
   );
 }
 
-function DetailField({
-  label,
-  value,
-  mono,
-}: {
-  label: string;
-  value: string;
-  mono?: boolean;
-}) {
+function DetailField({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="rounded-2xl border border-border/50 bg-background/30 px-4 py-3">
       <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>

@@ -67,7 +67,7 @@ function ForgotPasswordPage() {
                 className="mt-1.5 w-full rounded-xl border border-border bg-background/60 px-4 py-3 text-sm outline-none focus:border-primary"
               />
             </div>
-            
+
             <div>
               <label className="text-xs font-medium text-foreground/85">Reset Key</label>
               <input

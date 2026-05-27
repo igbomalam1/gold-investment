@@ -33,8 +33,8 @@ export function MarketDashboard() {
               The pulse of <span className="text-gradient-gold">global wealth</span>
             </h2>
             <p className="mt-3 max-w-xl text-muted-foreground">
-              Crypto, metals and forex pairs streamed in real-time. Your portfolio
-              is actively positioned across all three on every trading day.
+              Crypto, metals and forex pairs streamed in real-time. Your portfolio is actively
+              positioned across all three on every trading day.
             </p>
           </div>
           <div className="hidden items-center gap-2 rounded-full border border-success/30 bg-success/10 px-3 py-1.5 text-xs text-success md:flex">
@@ -84,7 +84,10 @@ export function MarketDashboard() {
                 </span>
               </div>
               <div className="mt-4 font-display text-2xl">
-                ${m.price.toLocaleString(undefined, { maximumFractionDigits: m.price > 100 ? 2 : 4 })}
+                $
+                {m.price.toLocaleString(undefined, {
+                  maximumFractionDigits: m.price > 100 ? 2 : 4,
+                })}
               </div>
               <div className="mt-3 h-12">
                 <Spark seed={m.symbol} positive={m.change24h >= 0} />

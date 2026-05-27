@@ -57,16 +57,19 @@ function AdminWalletsPage() {
     return acc;
   }, {});
 
-  const groupedEntries = Object.entries(grouped).map(([key, wallets]) => [
-    key,
-    [...wallets].sort((a, b) => {
-      const scoreA = getWalletMixScore(a);
-      const scoreB = getWalletMixScore(b);
+  const groupedEntries = Object.entries(grouped).map(
+    ([key, wallets]) =>
+      [
+        key,
+        [...wallets].sort((a, b) => {
+          const scoreA = getWalletMixScore(a);
+          const scoreB = getWalletMixScore(b);
 
-      if (scoreA !== scoreB) return scoreA - scoreB;
-      return a.address.localeCompare(b.address);
-    }),
-  ] as const);
+          if (scoreA !== scoreB) return scoreA - scoreB;
+          return a.address.localeCompare(b.address);
+        }),
+      ] as const,
+  );
 
   const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

@@ -88,12 +88,10 @@ function AdminPlansPage() {
               </div>
               <h3 className="mt-1 font-display text-2xl text-gradient-gold">{p.name}</h3>
               <div className="mt-3 font-display text-3xl">
-                {p.daily_roi_pct}%
-                <span className="text-xs text-muted-foreground"> /day</span>
+                {p.daily_roi_pct}%<span className="text-xs text-muted-foreground"> /day</span>
               </div>
               <div className="mt-2 text-xs text-muted-foreground">
-                {formatCurrency(p.min_amount)} — {formatCurrency(p.max_amount)} ·{" "}
-                {p.duration_days}d
+                {formatCurrency(p.min_amount)} — {formatCurrency(p.max_amount)} · {p.duration_days}d
               </div>
               <button
                 onClick={() => setEditing(p)}
@@ -124,11 +122,7 @@ function AdminPlansPage() {
             </div>
             <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
               <Field label="Daily ROI %" name="roi" defaultValue={editing.daily_roi_pct} />
-              <Field
-                label="Duration (days)"
-                name="duration"
-                defaultValue={editing.duration_days}
-              />
+              <Field label="Duration (days)" name="duration" defaultValue={editing.duration_days} />
               <Field label="Min amount" name="min" defaultValue={editing.min_amount} />
               <Field label="Max amount" name="max" defaultValue={editing.max_amount} />
             </div>

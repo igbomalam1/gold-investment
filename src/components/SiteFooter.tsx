@@ -9,9 +9,9 @@ export function SiteFooter() {
           <div className="lg:col-span-2">
             <Logo size={48} />
             <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground">
-              Gold Empire Investment is a private wealth platform combining crypto,
-              commodities, and forex into one transparent, performance-driven
-              experience. From $10 starter plans to $1M family-office portfolios.
+              Gold Empire Investment is a private wealth platform combining crypto, commodities, and
+              forex into one transparent, performance-driven experience. From $10 starter plans to
+              $1M family-office portfolios.
             </p>
             <div className="mt-6 flex gap-3">
               {[Globe, Send, MessageCircle, Mail].map((Icon, i) => (
@@ -29,20 +29,52 @@ export function SiteFooter() {
           <div>
             <h4 className="font-display text-lg text-gradient-gold">Platform</h4>
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-              <li><a href="#plans" className="hover:text-primary">Investment Plans</a></li>
-              <li><a href="#markets" className="hover:text-primary">Live Markets</a></li>
-              <li><a href="#how" className="hover:text-primary">How it works</a></li>
-              <li><a href="#about" className="hover:text-primary">About us</a></li>
+              <li>
+                <a href="#plans" className="hover:text-primary">
+                  Investment Plans
+                </a>
+              </li>
+              <li>
+                <a href="#markets" className="hover:text-primary">
+                  Live Markets
+                </a>
+              </li>
+              <li>
+                <a href="#how" className="hover:text-primary">
+                  How it works
+                </a>
+              </li>
+              <li>
+                <a href="#about" className="hover:text-primary">
+                  About us
+                </a>
+              </li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-display text-lg text-gradient-gold">Legal</h4>
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-primary">Terms of service</a></li>
-              <li><a href="#" className="hover:text-primary">Privacy policy</a></li>
-              <li><a href="#" className="hover:text-primary">Risk disclosure</a></li>
-              <li><a href="#" className="hover:text-primary">AML / KYC</a></li>
+              <li>
+                <a href="#" className="hover:text-primary">
+                  Terms of service
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-primary">
+                  Privacy policy
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-primary">
+                  Risk disclosure
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-primary">
+                  AML / KYC
+                </a>
+              </li>
             </ul>
           </div>
         </div>

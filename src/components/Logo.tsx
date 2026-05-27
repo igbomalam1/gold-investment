@@ -16,7 +16,9 @@ export function Logo({ size = 44, withText = true, className = "" }: Props) {
       {withText && (
         <div className="leading-tight">
           <div className="font-display text-xl tracking-wide text-gradient-gold">Gold Empire</div>
-          <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Investment</div>
+          <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+            Investment
+          </div>
         </div>
       )}
     </div>

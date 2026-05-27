@@ -123,11 +123,22 @@
   --sidebar-ring: oklch(0.78 0.13 85);
 
   /* Gradients & shadows */
-  --gradient-gold: linear-gradient(135deg, oklch(0.9 0.09 88), oklch(0.7 0.14 80) 60%, oklch(0.55 0.13 70));
-  --gradient-emerald: linear-gradient(140deg, oklch(0.16 0.04 165), oklch(0.28 0.08 165) 50%, oklch(0.18 0.05 160));
-  --gradient-hero: radial-gradient(1200px 600px at 80% -10%, oklch(0.42 0.12 165 / 50%), transparent 60%),
-                   radial-gradient(900px 500px at 0% 100%, oklch(0.6 0.13 75 / 25%), transparent 60%),
-                   linear-gradient(180deg, oklch(0.14 0.04 165), oklch(0.18 0.04 165));
+  --gradient-gold: linear-gradient(
+    135deg,
+    oklch(0.9 0.09 88),
+    oklch(0.7 0.14 80) 60%,
+    oklch(0.55 0.13 70)
+  );
+  --gradient-emerald: linear-gradient(
+    140deg,
+    oklch(0.16 0.04 165),
+    oklch(0.28 0.08 165) 50%,
+    oklch(0.18 0.05 160)
+  );
+  --gradient-hero:
+    radial-gradient(1200px 600px at 80% -10%, oklch(0.42 0.12 165 / 50%), transparent 60%),
+    radial-gradient(900px 500px at 0% 100%, oklch(0.6 0.13 75 / 25%), transparent 60%),
+    linear-gradient(180deg, oklch(0.14 0.04 165), oklch(0.18 0.04 165));
   --shadow-gold: 0 20px 60px -20px oklch(0.78 0.13 85 / 35%);
   --shadow-emerald: 0 25px 70px -25px oklch(0.42 0.12 165 / 60%);
   --shadow-card: 0 10px 40px -15px oklch(0.1 0.04 165 / 70%);
@@ -159,7 +170,11 @@
     background-attachment: fixed;
   }
 
-  h1, h2, h3, h4, h5 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
     font-family: var(--font-display);
     letter-spacing: -0.01em;
   }
@@ -213,13 +228,21 @@
   }
 
   @keyframes marquee {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
   }
 
   @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
   }
 
   .shimmer {
@@ -229,9 +252,16 @@
   }
 
   @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
   }
 
-  .float { animation: float 6s ease-in-out infinite; }
+  .float {
+    animation: float 6s ease-in-out infinite;
+  }
 }

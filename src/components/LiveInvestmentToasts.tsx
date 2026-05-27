@@ -36,7 +36,9 @@ export function LiveInvestmentToasts() {
               </div>
               <div className="flex items-center gap-1.5 text-xs">
                 <TrendingUp size={11} className="text-success" />
-                <span className="text-success font-semibold">invested {formatCurrency(current.amount)}</span>
+                <span className="text-success font-semibold">
+                  invested {formatCurrency(current.amount)}
+                </span>
                 <span className="text-muted-foreground">· {current.plan}</span>
               </div>
             </div>

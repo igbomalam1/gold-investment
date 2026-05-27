@@ -34,11 +34,28 @@ function SignupPage() {
     try {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
       const guess: Record<string, string> = {
-        London: "GB", Paris: "FR", Berlin: "DE", Madrid: "ES", Rome: "IT",
-        Amsterdam: "NL", Tokyo: "JP", Shanghai: "CN", Singapore: "SG",
-        Dubai: "AE", Lagos: "NG", Cairo: "EG", Sao_Paulo: "BR", Mexico_City: "MX",
-        Sydney: "AU", New_York: "US", Los_Angeles: "US", Chicago: "US",
-        Toronto: "CA", Mumbai: "IN", Istanbul: "TR", Moscow: "RU",
+        London: "GB",
+        Paris: "FR",
+        Berlin: "DE",
+        Madrid: "ES",
+        Rome: "IT",
+        Amsterdam: "NL",
+        Tokyo: "JP",
+        Shanghai: "CN",
+        Singapore: "SG",
+        Dubai: "AE",
+        Lagos: "NG",
+        Cairo: "EG",
+        Sao_Paulo: "BR",
+        Mexico_City: "MX",
+        Sydney: "AU",
+        New_York: "US",
+        Los_Angeles: "US",
+        Chicago: "US",
+        Toronto: "CA",
+        Mumbai: "IN",
+        Istanbul: "TR",
+        Moscow: "RU",
       };
       const city = tz.split("/")[1];
       if (city && guess[city]) setCountry(guess[city]);
@@ -70,7 +87,10 @@ function SignupPage() {
     if (data.user?.id && referralCode) {
       // If it's a UUID (legacy), we can try direct update, else try RPC for short code
       if (referralCode.length > 20) {
-        await supabase.from("profiles").update({ referrer_id: referralCode }).eq("id", data.user.id);
+        await supabase
+          .from("profiles")
+          .update({ referrer_id: referralCode })
+          .eq("id", data.user.id);
       } else {
         await supabase.rpc("apply_referral_code", { _code: referralCode });
       }

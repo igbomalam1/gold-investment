@@ -48,7 +48,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     async function init() {
       try {
-        const { data: { session: sess } } = await supabase.auth.getSession();
+        const {
+          data: { session: sess },
+        } = await supabase.auth.getSession();
         if (!mounted) return;
 
         if (sess) {
@@ -68,10 +70,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { data: sub } = supabase.auth.onAuthStateChange(async (event, sess) => {
       if (!mounted) return;
-      
+
       setSession(sess);
       setUser(sess?.user ?? null);
-      
+
       if (sess?.user) {
         // Fetch data but DO NOT set global loading=true again
         loadUserData(sess.user.id);

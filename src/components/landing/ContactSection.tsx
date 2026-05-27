@@ -16,8 +16,8 @@ export function ContactSection() {
               Let's <span className="text-gradient-gold">talk numbers</span>
             </h2>
             <p className="mt-4 text-muted-foreground">
-              Whether you're a $50 starter or a $1M family office, our team replies
-              within 60 minutes — every day, every timezone.
+              Whether you're a $50 starter or a $1M family office, our team replies within 60
+              minutes — every day, every timezone.
             </p>
 
             <div className="mt-8 space-y-3">
@@ -63,7 +63,15 @@ export function ContactSection() {
               type="submit"
               className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-gold px-6 py-3 text-sm font-semibold text-primary-foreground shadow-gold"
             >
-              {sent ? (<><CheckCircle2 size={16} /> Message sent</>) : (<><Send size={16} /> Send message</>)}
+              {sent ? (
+                <>
+                  <CheckCircle2 size={16} /> Message sent
+                </>
+              ) : (
+                <>
+                  <Send size={16} /> Send message
+                </>
+              )}
             </button>
           </form>
         </div>
@@ -107,7 +115,10 @@ export function ContactSection() {
   );
 }
 
-function Input({ label, ...rest }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+function Input({
+  label,
+  ...rest
+}: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <div>
       <label className="text-xs font-medium text-foreground/85">{label}</label>

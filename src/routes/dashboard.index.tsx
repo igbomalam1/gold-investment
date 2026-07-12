@@ -99,7 +99,9 @@ function DashboardHome() {
     await load();
   };
 
-  const totalProfit = investments.reduce((sum, i) => {
+  // Calculate uncredited live profit (yield not yet moved to available_yield)
+  // This is the yield accumulated since last credit
+  const uncreditedProfit = investments.reduce((sum, i) => {
     if (i.status !== "active") return sum;
     const start = new Date(i.started_at).getTime();
     const end = new Date(i.ends_at).getTime();
@@ -109,6 +111,9 @@ function DashboardHome() {
 
   // Total withdrawable balance includes both balance and available_yield
   const withdrawableBalance = (profile?.balance ?? 0) + (profile?.available_yield ?? 0);
+  
+  // Total lifetime profit (available + uncredited)
+  const totalLifetimeProfit = (profile?.available_yield ?? 0) + uncreditedProfit;
   const referralLink = profile
     ? `${window.location.origin}/signup?ref=${profile.referral_code || profile.id}`
     : "";
@@ -141,7 +146,7 @@ function DashboardHome() {
                 {formatCurrency(withdrawableBalance)}
               </div>
               <div className="mt-2 flex items-center gap-1.5 text-sm text-success">
-                <TrendingUp size={14} /> +{formatCurrency(totalProfit)} live profit
+                <TrendingUp size={14} /> +{formatCurrency(uncreditedProfit)} uncredited profit
               </div>
               {(profile?.available_yield ?? 0) > 0 && (
                 <div className="mt-1 text-xs text-muted-foreground">
@@ -152,7 +157,7 @@ function DashboardHome() {
 
             <div className="grid grid-cols-3 gap-3 sm:grid-cols-3">
               <Stat label="Invested" value={formatCurrency(profile?.total_invested ?? 0)} />
-              <Stat label="Yield Earned" value={formatCurrency(profile?.available_yield ?? 0)} positive />
+              <Stat label="Yield Available" value={formatCurrency(profile?.available_yield ?? 0)} positive />
               <Stat label="Bonus ROI" value={`+${profile?.custom_roi_bonus ?? 0}%`} />
             </div>
           </div>

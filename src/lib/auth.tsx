@@ -92,8 +92,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refreshProfile = async () => {
-    if (user) await loadUserData(user.id);
+    if (user) {
+      // Process any pending daily payouts first
+      await supabase.rpc("process_user_daily_payouts", { p_user_id: user.id });
+      await loadUserData(user.id);
+    }
   };
+
+  // Process payouts on initial load
+  useEffect(() => {
+    if (user && !loading) {
+      supabase.rpc("process_user_daily_payouts", { p_user_id: user.id }).then(() => {
+        loadUserData(user.id);
+      });
+    }
+  }, [user?.id]);
   const signOut = async () => {
     await supabase.auth.signOut();
     localStorage.clear(); // Clear everything to be safe

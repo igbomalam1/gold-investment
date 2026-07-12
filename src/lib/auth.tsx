@@ -8,6 +8,7 @@ type Profile = {
   email: string | null;
   country: string | null;
   balance: number;
+  available_yield: number;
   total_invested: number;
   total_profit: number;
   custom_roi_bonus: number;

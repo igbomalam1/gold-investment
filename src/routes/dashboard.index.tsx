@@ -106,6 +106,9 @@ function DashboardHome() {
     const elapsed = Math.max(0, (Math.min(Date.now(), end) - start) / 86400000);
     return sum + ((Number(i.amount) * Number(i.daily_roi_pct)) / 100) * elapsed;
   }, 0);
+
+  // Total withdrawable balance includes both balance and available_yield
+  const withdrawableBalance = (profile?.balance ?? 0) + (profile?.available_yield ?? 0);
   const referralLink = profile
     ? `${window.location.origin}/signup?ref=${profile.referral_code || profile.id}`
     : "";
@@ -135,16 +138,21 @@ function DashboardHome() {
                 <Sparkles size={12} className="text-primary" /> Total balance
               </div>
               <div className="mt-2 font-display text-5xl text-gradient-gold lg:text-6xl">
-                {formatCurrency(profile?.balance ?? 0)}
+                {formatCurrency(withdrawableBalance)}
               </div>
               <div className="mt-2 flex items-center gap-1.5 text-sm text-success">
                 <TrendingUp size={14} /> +{formatCurrency(totalProfit)} live profit
               </div>
+              {(profile?.available_yield ?? 0) > 0 && (
+                <div className="mt-1 text-xs text-muted-foreground">
+                  Includes {formatCurrency(profile?.available_yield ?? 0)} from yield earnings
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-3 gap-3 sm:grid-cols-3">
               <Stat label="Invested" value={formatCurrency(profile?.total_invested ?? 0)} />
-              <Stat label="Profit" value={formatCurrency(totalProfit)} positive />
+              <Stat label="Yield Earned" value={formatCurrency(profile?.available_yield ?? 0)} positive />
               <Stat label="Bonus ROI" value={`+${profile?.custom_roi_bonus ?? 0}%`} />
             </div>
           </div>

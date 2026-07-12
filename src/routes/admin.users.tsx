@@ -16,6 +16,7 @@ type Profile = {
   email: string | null;
   country: string | null;
   balance: number;
+  available_yield: number;
   total_invested: number;
   total_profit: number;
   custom_roi_bonus: number;
@@ -331,10 +332,11 @@ function AdminUsersPage() {
                     </div>
                   </div>
 
-                  <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-3 lg:min-w-[460px]">
+                  <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-4 lg:min-w-[560px]">
                     <InlineDetail label="Country" value={user.country || "-"} />
                     <InlineDetail label="Joined" value={formatDateTime(user.created_at)} />
                     <InlineDetail label="Balance" value={formatCurrency(user.balance)} emphasized />
+                    <InlineDetail label="Yield" value={formatCurrency(user.available_yield)} emphasized />
                   </div>
 
                   <div className="text-sm font-semibold text-primary">Open details</div>
@@ -373,11 +375,16 @@ function AdminUsersPage() {
               </div>
             ) : (
               <div className="mt-6 max-h-[76vh] space-y-6 overflow-y-auto pr-1">
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   <SummaryCard
                     label="Current balance"
                     value={formatCurrency(activeUser.balance)}
                     sub="Available for deposits, withdrawals and admin actions."
+                  />
+                  <SummaryCard
+                    label="Available yield"
+                    value={formatCurrency(activeUser.available_yield)}
+                    sub="Accumulated yield earnings available for withdrawal."
                   />
                   <SummaryCard
                     label="Total invested"

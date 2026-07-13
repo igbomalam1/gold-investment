@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X, CheckCircle2, Loader2 } from "lucide-react";
+import { X, CheckCircle2, Loader2, Wallet, TrendingUp } from "lucide-react";
 import { DEPOSIT_TOKENS } from "@/lib/mock-data";
 import { formatCurrency } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
@@ -7,16 +7,47 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export function WithdrawModal({ onClose }: { onClose: () => void }) {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const [amount, setAmount] = useState("");
   const [token, setToken] = useState("USDT");
   const [network, setNetwork] = useState("TRC-20");
   const [address, setAddress] = useState("");
+  const [balanceType, setBalanceType] = useState<"balance" | "yield">("balance");
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [yieldAmount, setYieldAmount] = useState(0);
 
-  // Withdrawable balance is just balance (yield gets credited directly to balance)
-  const withdrawableBalance = profile?.balance ?? 0;
+  // Calculate pending yield from active investments
+  useEffect(() => {
+    if (!user) return;
+    
+    const calculateYield = async () => {
+      const { data: investments } = await supabase
+        .from("investments")
+        .select("amount, daily_roi_pct, started_at, ends_at, status")
+        .eq("user_id", user.id)
+        .eq("status", "active");
+      
+      let totalYield = 0;
+      (investments || []).forEach((i: any) => {
+        const start = new Date(i.started_at).getTime();
+        const end = new Date(i.ends_at).getTime();
+        const elapsed = Math.max(0, (Math.min(Date.now(), end) - start) / 86400000);
+        totalYield += ((Number(i.amount) * Number(i.daily_roi_pct)) / 100) * elapsed;
+      });
+      
+      setYieldAmount(totalYield);
+    };
+    
+    calculateYield();
+  }, [user]);
+
+  // Balance from deposits
+  const depositBalance = profile?.balance ?? 0;
+  // Total including uncredited yield
+  const totalWithYield = depositBalance + yieldAmount;
+  // Available for withdrawal based on selection
+  const withdrawableBalance = balanceType === "balance" ? depositBalance : yieldAmount;
 
   useEffect(() => {
     const t = DEPOSIT_TOKENS.find((x) => x.symbol === token);
@@ -26,6 +57,20 @@ export function WithdrawModal({ onClose }: { onClose: () => void }) {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    
+    // If withdrawing from yield, first credit the yield to balance
+    if (balanceType === "yield" && yieldAmount > 0) {
+      const { error: creditError } = await supabase.rpc("credit_yield_to_balance", {
+        p_user_id: user?.id,
+        p_amount: Math.min(Number(amount), yieldAmount)
+      });
+      if (creditError) {
+        toast.error("Failed to credit yield: " + creditError.message);
+        setLoading(false);
+        return;
+      }
+    }
+    
     const { error } = await supabase.rpc("request_withdrawal", {
       _amount: Number(amount),
       _token: token,
@@ -77,9 +122,38 @@ export function WithdrawModal({ onClose }: { onClose: () => void }) {
         ) : (
           <form onSubmit={submit} className="mt-5 space-y-4">
             <div className="rounded-xl bg-background/40 p-3 text-xs">
-              <div className="text-muted-foreground">Available balance</div>
-              <div className="mt-0.5 font-mono text-base font-semibold text-gradient-gold">
-                {formatCurrency(withdrawableBalance)}
+              <div className="text-muted-foreground">Withdraw from</div>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setBalanceType("balance")}
+                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-left ${
+                    balanceType === "balance"
+                      ? "bg-primary/20 border border-primary/50"
+                      : "bg-background/60 border border-border"
+                  }`}
+                >
+                  <Wallet size={14} className={balanceType === "balance" ? "text-primary" : ""} />
+                  <div>
+                    <div className="text-[10px] text-muted-foreground">Deposits</div>
+                    <div className="font-semibold">{formatCurrency(depositBalance)}</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBalanceType("yield")}
+                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-left ${
+                    balanceType === "yield"
+                      ? "bg-success/20 border border-success/50"
+                      : "bg-background/60 border border-border"
+                  }`}
+                >
+                  <TrendingUp size={14} className={balanceType === "yield" ? "text-success" : ""} />
+                  <div>
+                    <div className="text-[10px] text-muted-foreground">Yield</div>
+                    <div className="font-semibold">{formatCurrency(yieldAmount)}</div>
+                  </div>
+                </button>
               </div>
             </div>
 

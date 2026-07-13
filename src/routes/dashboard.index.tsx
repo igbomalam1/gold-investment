@@ -99,17 +99,17 @@ function DashboardHome() {
     await load();
   };
 
-  // Total balance is now just the balance field (yield gets credited directly to balance)
-  const withdrawableBalance = profile?.balance ?? 0;
-  
-  // Calculate total earned from investments for display
-  const totalEarned = investments.reduce((sum, i) => {
+  // Calculate pending yield (not yet credited to balance)
+  const pendingYield = investments.reduce((sum, i) => {
     if (i.status !== "active") return sum;
     const start = new Date(i.started_at).getTime();
     const end = new Date(i.ends_at).getTime();
     const elapsed = Math.max(0, (Math.min(Date.now(), end) - start) / 86400000);
     return sum + ((Number(i.amount) * Number(i.daily_roi_pct)) / 100) * elapsed;
   }, 0);
+
+  // Total withdrawable balance (balance + pending yield that can be withdrawn)
+  const withdrawableBalance = profile?.balance ?? 0;
   const referralLink = profile
     ? `${window.location.origin}/signup?ref=${profile.referral_code || profile.id}`
     : "";
@@ -142,13 +142,13 @@ function DashboardHome() {
                 {formatCurrency(withdrawableBalance)}
               </div>
               <div className="mt-2 flex items-center gap-1.5 text-sm text-success">
-                <TrendingUp size={14} /> +{formatCurrency(totalEarned)} total earned
+                <TrendingUp size={14} /> +{formatCurrency(pendingYield)} pending yield
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-3 sm:grid-cols-3">
               <Stat label="Invested" value={formatCurrency(profile?.total_invested ?? 0)} />
-              <Stat label="Total Earned" value={formatCurrency(totalEarned)} positive />
+              <Stat label="Pending Yield" value={formatCurrency(pendingYield)} positive />
               <Stat label="Bonus ROI" value={`+${profile?.custom_roi_bonus ?? 0}%`} />
             </div>
           </div>

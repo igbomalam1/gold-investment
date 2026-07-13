@@ -93,16 +93,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshProfile = async () => {
     if (user) {
-      // Update live profit calculation first
-      await supabase.rpc("update_user_live_profit", { p_user_id: user.id });
+      // Credit daily yield to balance first
+      await supabase.rpc("credit_daily_yield_to_balance", { p_user_id: user.id });
       await loadUserData(user.id);
     }
   };
 
-  // Update live profit on initial load
+  // Credit yield on initial load
   useEffect(() => {
     if (user && !loading) {
-      supabase.rpc("update_user_live_profit", { p_user_id: user.id }).then(() => {
+      supabase.rpc("credit_daily_yield_to_balance", { p_user_id: user.id }).then(() => {
         loadUserData(user.id);
       });
     }

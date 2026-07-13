@@ -15,8 +15,8 @@ export function WithdrawModal({ onClose }: { onClose: () => void }) {
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Total withdrawable balance includes both balance and available_yield
-  const withdrawableBalance = (profile?.balance ?? 0) + (profile?.available_yield ?? 0);
+  // Withdrawable balance is just balance (yield gets credited directly to balance)
+  const withdrawableBalance = profile?.balance ?? 0;
 
   useEffect(() => {
     const t = DEPOSIT_TOKENS.find((x) => x.symbol === token);
@@ -81,11 +81,6 @@ export function WithdrawModal({ onClose }: { onClose: () => void }) {
               <div className="mt-0.5 font-mono text-base font-semibold text-gradient-gold">
                 {formatCurrency(withdrawableBalance)}
               </div>
-              {(profile?.available_yield ?? 0) > 0 && (
-                <div className="mt-1 text-[10px] text-success">
-                  Includes {formatCurrency(profile?.available_yield ?? 0)} from yield earnings
-                </div>
-              )}
             </div>
 
             <div>

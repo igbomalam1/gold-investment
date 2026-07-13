@@ -104,7 +104,7 @@ function DashboardHome() {
     if (i.status !== "active") return sum;
     const start = new Date(i.started_at).getTime();
     const end = new Date(i.ends_at).getTime();
-    const elapsed = Math.max(0, (Math.min(Date.now(), end) - start) / 86400);
+    const elapsed = Math.max(0, (Math.min(Date.now(), end) - start) / 86400000);
     return sum + ((Number(i.amount) * Number(i.daily_roi_pct)) / 100) * elapsed;
   }, 0);
 
@@ -144,6 +144,27 @@ function DashboardHome() {
               <div className="mt-2 flex items-center gap-1.5 text-sm text-success">
                 <TrendingUp size={14} /> +{formatCurrency(pendingYield)} pending yield
               </div>
+              {pendingYield > 0 && (
+                <button
+                  onClick={async () => {
+                    if (!user) return;
+                    const { data: credited, error } = await (supabase.rpc as any)("credit_daily_yield_to_balance", {
+                      p_user_id: user.id,
+                    });
+                    if (error) {
+                      toast.error("Failed: " + error.message);
+                    } else {
+                      toast.success(`Credited ${formatCurrency(Number(credited))} to your balance!`);
+                      await refreshProfile();
+                      await load();
+                    }
+                  }}
+                  className="mt-3 flex items-center gap-2 rounded-full bg-success/90 px-5 py-2 text-xs font-semibold text-white hover:bg-success transition-colors"
+                >
+                  <TrendingUp size={13} />
+                  Withdraw Yield ({formatCurrency(pendingYield)})
+                </button>
+              )}
             </div>
 
             <div className="grid grid-cols-3 gap-3 sm:grid-cols-3">

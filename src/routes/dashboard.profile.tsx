@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Mail, Globe, Shield, Wallet, ArrowUpRight, Loader2, Camera, TrendingUp } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { Mail, Globe, Shield, Wallet, ArrowUpRight, Camera } from "lucide-react";
+import { useState, useRef } from "react";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,8 +15,6 @@ export const Route = createFileRoute("/dashboard/profile")({
 function ProfilePage() {
   const { profile, user, loading, refreshProfile } = useAuth();
   const [uploading, setUploading] = useState(false);
-  const [pendingYield, setPendingYield] = useState(0);
-  const [creditingYield, setCreditingYield] = useState(false);
   const fetchedRef = useRef(false);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,51 +44,6 @@ function ProfilePage() {
       toast.error(error.message || "Error uploading image");
     } finally {
       setUploading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!user || fetchedRef.current) return;
-    fetchedRef.current = true;
-
-    const fetchYield = async () => {
-      const { data: investments } = await (supabase
-        .from("investments")
-        .select("amount, daily_roi_pct, started_at")
-        .eq("user_id", user.id)
-        .eq("status", "active") as any);
-
-      let total = 0;
-      for (const i of investments || []) {
-        const days = Math.max(0, (Date.now() - new Date(i.started_at).getTime()) / 86400000);
-        if (days >= 1) {
-          total += (Number(i.amount) * Number(i.daily_roi_pct) / 100) * days;
-        }
-      }
-      setPendingYield(total);
-    };
-    fetchYield();
-  }, [user]);
-
-  const handleCreditYield = async () => {
-    if (!user || pendingYield <= 0) return;
-    setCreditingYield(true);
-    try {
-      const { data, error } = await (supabase.rpc as any)("credit_daily_yield_to_balance", {
-        p_user_id: user.id,
-      });
-      if (error) {
-        toast.error("Failed: " + error.message);
-      } else {
-        const credited = Number(data) || 0;
-        toast.success(`Credited ${formatCurrency(credited)} to your balance!`);
-        setPendingYield(0);
-        await refreshProfile();
-      }
-    } catch (e: any) {
-      toast.error(e.message || "Failed");
-    } finally {
-      setCreditingYield(false);
     }
   };
 
@@ -174,36 +127,6 @@ function ProfilePage() {
           </div>
         </div>
       </div>
-
-      {pendingYield > 0 && (
-        <div className="rounded-3xl bg-gradient-emerald p-1 shadow-emerald">
-          <div className="rounded-[calc(1.5rem-4px)] bg-card/80 p-6 backdrop-blur-xl flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-success">
-                <TrendingUp size={14} /> Pending Yield
-              </div>
-              <div className="mt-1 font-display text-3xl text-success">
-                {formatCurrency(pendingYield)}
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Yield accumulated from your active investments.
-              </p>
-            </div>
-            <button
-              onClick={handleCreditYield}
-              disabled={creditingYield}
-              className="flex items-center gap-2 rounded-full bg-success px-6 py-3 text-sm font-semibold text-white hover:bg-success/90 transition-colors disabled:opacity-60"
-            >
-              {creditingYield ? (
-                <Loader2 size={14} className="animate-spin" />
-              ) : (
-                <TrendingUp size={14} />
-              )}
-              {creditingYield ? "Crediting..." : "Withdraw Yield"}
-            </button>
-          </div>
-        </div>
-      )}
 
       <div className="grid gap-4 sm:grid-cols-3">
         {[

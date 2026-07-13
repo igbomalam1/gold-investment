@@ -93,18 +93,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshProfile = async () => {
     if (user) {
-      // Credit daily yield to balance first
-      await (supabase.rpc as any)("credit_daily_yield_to_balance", { p_user_id: user.id });
       await loadUserData(user.id);
     }
   };
 
-  // Credit yield on initial load
   useEffect(() => {
     if (user && !loading) {
-      (supabase.rpc as any)("credit_daily_yield_to_balance", { p_user_id: user.id }).then(() => {
-        loadUserData(user.id);
-      });
+      loadUserData(user.id);
     }
   }, [user?.id]);
   const signOut = async () => {

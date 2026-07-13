@@ -99,14 +99,18 @@ function DashboardHome() {
     await load();
   };
 
-  // Pending yield (next 24hr credit cycle)
-  const pendingYield = investments.reduce((sum, i) => {
+  // Total accumulated yield across all active investments
+  const totalAccumulatedYield = investments.reduce((sum, i) => {
     if (i.status !== "active") return sum;
     const start = new Date(i.started_at).getTime();
     const end = new Date(i.ends_at).getTime();
     const elapsed = Math.max(0, (Math.min(Date.now(), end) - start) / 86400000);
     return sum + ((Number(i.amount) * Number(i.daily_roi_pct)) / 100) * elapsed;
   }, 0);
+
+  // Subtract already-credited profit to get uncredited yield
+  const alreadyCredited = Number(profile?.total_profit ?? 0);
+  const pendingYield = Math.max(0, totalAccumulatedYield - alreadyCredited);
 
   // Balance already includes all credited yield
   const totalBalance = profile?.balance ?? 0;
@@ -150,6 +154,7 @@ function DashboardHome() {
                     if (!user) return;
                     const { data: credited, error } = await (supabase.rpc as any)("credit_daily_yield_to_balance", {
                       p_user_id: user.id,
+                      p_amount: pendingYield,
                     });
                     if (error) {
                       toast.error("Failed: " + error.message);

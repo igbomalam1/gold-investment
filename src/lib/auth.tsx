@@ -8,7 +8,7 @@ type Profile = {
   email: string | null;
   country: string | null;
   balance: number;
-  available_yield: number;
+  avatar_url?: string | null;
   total_invested: number;
   total_profit: number;
   custom_roi_bonus: number;
@@ -94,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshProfile = async () => {
     if (user) {
       // Credit daily yield to balance first
-      await supabase.rpc("credit_daily_yield_to_balance", { p_user_id: user.id });
+      await (supabase.rpc as any)("credit_daily_yield_to_balance", { p_user_id: user.id });
       await loadUserData(user.id);
     }
   };
@@ -102,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Credit yield on initial load
   useEffect(() => {
     if (user && !loading) {
-      supabase.rpc("credit_daily_yield_to_balance", { p_user_id: user.id }).then(() => {
+      (supabase.rpc as any)("credit_daily_yield_to_balance", { p_user_id: user.id }).then(() => {
         loadUserData(user.id);
       });
     }
@@ -115,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ session, user, profile, isAdmin, loading, refreshProfile, signOut }}
+      value={{ session, user, profile, isAdmin: isAdmin ?? false, loading, refreshProfile, signOut }}
     >
       {children}
     </AuthContext.Provider>

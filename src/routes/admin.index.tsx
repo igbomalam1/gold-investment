@@ -188,7 +188,7 @@ function DailyPayoutSection() {
     setBusy(true);
     setResult(null);
     try {
-      const { data, error } = await supabase.rpc("credit_all_daily_yield");
+      const { data, error } = await (supabase.rpc as any)("credit_all_daily_yield");
       if (error) return toast.error(error.message);
       const payouts = data as Array<{ user_id: string; credited: number }> | null;
       const total = payouts?.reduce((s, p) => s + Number(p.credited), 0) ?? 0;

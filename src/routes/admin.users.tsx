@@ -16,7 +16,6 @@ type Profile = {
   email: string | null;
   country: string | null;
   balance: number;
-  available_yield: number;
   total_invested: number;
   total_profit: number;
   custom_roi_bonus: number;
@@ -336,7 +335,7 @@ function AdminUsersPage() {
                     <InlineDetail label="Country" value={user.country || "-"} />
                     <InlineDetail label="Joined" value={formatDateTime(user.created_at)} />
                     <InlineDetail label="Balance" value={formatCurrency(user.balance)} emphasized />
-                    <InlineDetail label="Yield" value={formatCurrency(user.available_yield)} emphasized />
+                    <InlineDetail label="Total Profit" value={formatCurrency(user.total_profit)} emphasized />
                   </div>
 
                   <div className="text-sm font-semibold text-primary">Open details</div>
@@ -382,9 +381,9 @@ function AdminUsersPage() {
                     sub="Available for deposits, withdrawals and admin actions."
                   />
                   <SummaryCard
-                    label="Available yield"
-                    value={formatCurrency(activeUser.available_yield)}
-                    sub="Accumulated yield earnings available for withdrawal."
+                    label="Total profit"
+                    value={formatCurrency(activeUser.total_profit)}
+                    sub="Lifetime yield earnings credited to balance."
                   />
                   <SummaryCard
                     label="Total invested"

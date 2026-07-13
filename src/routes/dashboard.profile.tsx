@@ -19,21 +19,50 @@ function ProfilePage() {
   const [creditingYield, setCreditingYield] = useState(false);
   const fetchedRef = useRef(false);
 
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploading(true);
+      if (!e.target.files || e.target.files.length === 0) return;
+      if (!user) return;
+
+      const file = e.target.files[0];
+      const fileExt = file.name.split(".").pop();
+      const filePath = `${user.id}/${Math.random()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file);
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(filePath);
+
+      const { error: updateError } = await (supabase
+        .from("profiles")
+        .update({ avatar_url: publicUrl } as any)
+        .eq("id", user.id));
+      if (updateError) throw updateError;
+
+      await refreshProfile();
+      toast.success("Profile picture updated!");
+    } catch (error: any) {
+      toast.error(error.message || "Error uploading image");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   useEffect(() => {
     if (!user || fetchedRef.current) return;
     fetchedRef.current = true;
 
     const fetchYield = async () => {
-      const { data: investments } = await supabase
+      const { data: investments } = await (supabase
         .from("investments")
-        .select("amount, daily_roi_pct, started_at, last_payout_at")
+        .select("amount, daily_roi_pct, started_at")
         .eq("user_id", user.id)
-        .eq("status", "active");
+        .eq("status", "active") as any);
 
       let total = 0;
       for (const i of investments || []) {
-        const since = i.last_payout_at || i.started_at;
-        const days = Math.max(0, (Date.now() - new Date(since).getTime()) / 86400000);
+        const days = Math.max(0, (Date.now() - new Date(i.started_at).getTime()) / 86400000);
         if (days >= 1) {
           total += (Number(i.amount) * Number(i.daily_roi_pct) / 100) * days;
         }
@@ -47,7 +76,7 @@ function ProfilePage() {
     if (!user || pendingYield <= 0) return;
     setCreditingYield(true);
     try {
-      const { data, error } = await supabase.rpc("credit_daily_yield_to_balance", {
+      const { data, error } = await (supabase.rpc as any)("credit_daily_yield_to_balance", {
         p_user_id: user.id,
       });
       if (error) {
@@ -83,7 +112,6 @@ function ProfilePage() {
         </div>
       </div>
 
-      {/* Main Stats Banner */}
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 rounded-3xl bg-gradient-emerald p-1 shadow-emerald">
           <div className="h-full rounded-[calc(1.5rem-4px)] bg-card/80 p-8 backdrop-blur-xl">
@@ -147,7 +175,6 @@ function ProfilePage() {
         </div>
       </div>
 
-      {/* Yield Card */}
       {pendingYield > 0 && (
         <div className="rounded-3xl bg-gradient-emerald p-1 shadow-emerald">
           <div className="rounded-[calc(1.5rem-4px)] bg-card/80 p-6 backdrop-blur-xl flex flex-wrap items-center justify-between gap-4">

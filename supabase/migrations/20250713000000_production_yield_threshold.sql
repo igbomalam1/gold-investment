@@ -1,27 +1,26 @@
 -- Mirror coresera's payout pattern exactly
--- Uses next_payout_at column instead of broken minutes math
+-- Uses next_payout_at column — simple check, no complex math
 
--- 1. Add next_payout_at column (like coresera_stakings)
+-- 1. Add next_payout_at column
 ALTER TABLE public.investments ADD COLUMN IF NOT EXISTS next_payout_at TIMESTAMPTZ;
 
--- 2. Backfill: set next_payout_at = started_at for all active investments
+-- 2. Backfill: set next_payout_at = started_at for ALL active investments
 -- This ensures first payout triggers immediately for existing investments
 UPDATE public.investments
 SET next_payout_at = started_at
 WHERE status = 'active'
-  AND next_payout_at IS NULL;
+  AND (next_payout_at IS NULL OR next_payout_at > NOW());
 
--- Also set for new investments going forward
 ALTER TABLE public.investments ALTER COLUMN next_payout_at SET DEFAULT NOW();
 
--- 3. Drop old broken functions
+-- 3. Drop ALL old broken functions
 DROP FUNCTION IF EXISTS public.credit_daily_yield_to_balance(UUID);
 DROP FUNCTION IF EXISTS public.credit_all_daily_yield();
 DROP FUNCTION IF EXISTS public.credit_all_yield_to_balance(UUID);
 DROP FUNCTION IF EXISTS public.credit_yield_to_balance(UUID, NUMERIC);
 DROP FUNCTION IF EXISTS public.calculate_pending_yield(UUID);
 
--- 4. Per-user payout (called by auth.tsx on login — exact coresera pattern)
+-- 4. Per-user payout (called by auth.tsx on login + profile "Withdraw Yield" button)
 CREATE OR REPLACE FUNCTION public.credit_daily_yield_to_balance(p_user_id UUID)
 RETURNS NUMERIC
 LANGUAGE plpgsql
@@ -38,7 +37,6 @@ BEGIN
     FROM public.investments i
     WHERE i.status = 'active'
       AND i.user_id = p_user_id
-      AND i.ends_at > NOW()
       AND i.next_payout_at <= NOW()
     FOR UPDATE OF i SKIP LOCKED
   LOOP
@@ -61,7 +59,7 @@ BEGIN
 END;
 $$;
 
--- 5. Global payout (admin button — processes ALL users, exact coresera pattern)
+-- 5. Global payout (admin button)
 CREATE OR REPLACE FUNCTION public.credit_all_daily_yield()
 RETURNS TABLE(user_id UUID, credited NUMERIC)
 LANGUAGE plpgsql
@@ -76,7 +74,6 @@ BEGIN
     SELECT i.id, i.user_id, i.amount, i.daily_roi_pct
     FROM public.investments i
     WHERE i.status = 'active'
-      AND i.ends_at > NOW()
       AND i.next_payout_at <= NOW()
     FOR UPDATE OF i SKIP LOCKED
   LOOP

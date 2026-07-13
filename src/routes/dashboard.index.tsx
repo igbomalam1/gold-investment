@@ -153,6 +153,30 @@ function DashboardHome() {
             </div>
           </div>
 
+          {/* Credit Yield Button */}
+          {pendingYield > 0 && (
+            <div className="mt-4">
+              <button
+                onClick={async () => {
+                  if (!user) return;
+                  const { data: credited, error } = await supabase.rpc("credit_all_yield_to_balance", {
+                    p_user_id: user.id
+                  });
+                  if (error) {
+                    toast.error("Failed to credit yield: " + error.message);
+                  } else {
+                    toast.success(`Credited ${formatCurrency(Number(credited))} to your balance!`);
+                    await refreshProfile();
+                    await load();
+                  }
+                }}
+                className="w-full rounded-2xl border border-success/50 bg-success/10 px-4 py-3 text-sm font-semibold text-success hover:bg-success/20 transition-colors"
+              >
+                Credit {formatCurrency(pendingYield)} Yield to Balance
+              </button>
+            </div>
+          )}
+
           <div className="mt-7 grid grid-cols-3 gap-3">
             <ActionButton
               onClick={() => setModal("deposit")}

@@ -58,17 +58,18 @@ export function WithdrawModal({ onClose }: { onClose: () => void }) {
     e.preventDefault();
     setLoading(true);
     
-    // If withdrawing from yield, first credit the yield to balance
-    if (balanceType === "yield" && yieldAmount > 0) {
-      const { error: creditError } = await supabase.rpc("credit_yield_to_balance", {
-        p_user_id: user?.id,
-        p_amount: Math.min(Number(amount), yieldAmount)
+    // If withdrawing from yield, first credit ALL yield to balance
+    if (balanceType === "yield") {
+      const { data: credited, error: creditError } = await supabase.rpc("credit_all_yield_to_balance", {
+        p_user_id: user?.id
       });
       if (creditError) {
         toast.error("Failed to credit yield: " + creditError.message);
         setLoading(false);
         return;
       }
+      // Refresh profile to get updated balance
+      await refreshProfile();
     }
     
     const { error } = await supabase.rpc("request_withdrawal", {

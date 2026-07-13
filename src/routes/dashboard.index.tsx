@@ -99,17 +99,17 @@ function DashboardHome() {
     await load();
   };
 
-  // Calculate pending yield (not yet credited to balance)
+  // Pending yield (next 24hr credit cycle)
   const pendingYield = investments.reduce((sum, i) => {
     if (i.status !== "active") return sum;
     const start = new Date(i.started_at).getTime();
     const end = new Date(i.ends_at).getTime();
-    const elapsed = Math.max(0, (Math.min(Date.now(), end) - start) / 86400000);
+    const elapsed = Math.max(0, (Math.min(Date.now(), end) - start) / 86400);
     return sum + ((Number(i.amount) * Number(i.daily_roi_pct)) / 100) * elapsed;
   }, 0);
 
-  // Total withdrawable balance (balance + pending yield that can be withdrawn)
-  const withdrawableBalance = profile?.balance ?? 0;
+  // Balance already includes all credited yield
+  const totalBalance = profile?.balance ?? 0;
   const referralLink = profile
     ? `${window.location.origin}/signup?ref=${profile.referral_code || profile.id}`
     : "";
@@ -139,7 +139,7 @@ function DashboardHome() {
                 <Sparkles size={12} className="text-primary" /> Total balance
               </div>
               <div className="mt-2 font-display text-5xl text-gradient-gold lg:text-6xl">
-                {formatCurrency(withdrawableBalance)}
+                {formatCurrency(totalBalance)}
               </div>
               <div className="mt-2 flex items-center gap-1.5 text-sm text-success">
                 <TrendingUp size={14} /> +{formatCurrency(pendingYield)} pending yield
@@ -152,30 +152,6 @@ function DashboardHome() {
               <Stat label="Bonus ROI" value={`+${profile?.custom_roi_bonus ?? 0}%`} />
             </div>
           </div>
-
-          {/* Credit Yield Button */}
-          {pendingYield > 0 && (
-            <div className="mt-4">
-              <button
-                onClick={async () => {
-                  if (!user) return;
-                  const { data: credited, error } = await supabase.rpc("credit_all_yield_to_balance", {
-                    p_user_id: user.id
-                  });
-                  if (error) {
-                    toast.error("Failed to credit yield: " + error.message);
-                  } else {
-                    toast.success(`Credited ${formatCurrency(Number(credited))} to your balance!`);
-                    await refreshProfile();
-                    await load();
-                  }
-                }}
-                className="w-full rounded-2xl border border-success/50 bg-success/10 px-4 py-3 text-sm font-semibold text-success hover:bg-success/20 transition-colors"
-              >
-                Credit {formatCurrency(pendingYield)} Yield to Balance
-              </button>
-            </div>
-          )}
 
           <div className="mt-7 grid grid-cols-3 gap-3">
             <ActionButton

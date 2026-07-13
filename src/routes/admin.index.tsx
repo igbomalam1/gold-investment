@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Users, Wallet, TrendingUp, Bell, ArrowRight, Loader2 } from "lucide-react";
+import { Users, Wallet, TrendingUp, Bell, ArrowRight, Loader2, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency, formatDateTime } from "@/lib/format";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminHome,
@@ -132,6 +133,8 @@ function AdminHome() {
         </div>
       )}
 
+      <DailyPayoutSection />
+
       <section>
         <h2 className="font-display text-xl">Recent deposit activity</h2>
         <div className="mt-4 overflow-hidden rounded-3xl border border-border/60 bg-card/40 backdrop-blur">
@@ -173,6 +176,57 @@ function AdminHome() {
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+function DailyPayoutSection() {
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<{ processed: number; total: number } | null>(null);
+
+  const triggerPayout = async () => {
+    setBusy(true);
+    setResult(null);
+    try {
+      const { data, error } = await supabase.rpc("credit_all_daily_yield");
+      if (error) return toast.error(error.message);
+      const payouts = data as Array<{ user_id: string; credited: number }> | null;
+      const total = payouts?.reduce((s, p) => s + Number(p.credited), 0) ?? 0;
+      setResult({ processed: payouts?.length ?? 0, total });
+      toast.success(`Credited yield for ${payouts?.length ?? 0} users!`);
+    } catch (e: any) {
+      toast.error(e.message ?? "Payout trigger failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="rounded-3xl border border-primary/20 bg-card/60 p-6 backdrop-blur">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 text-sm font-semibold">
+            <Zap size={16} className="text-primary animate-pulse" /> Daily Yield Payout
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Credits all matured yield (24h+) to user balances instantly.
+          </p>
+        </div>
+        <button
+          onClick={triggerPayout}
+          disabled={busy}
+          className="inline-flex items-center gap-2 rounded-full bg-gradient-gold px-5 py-2.5 text-xs font-semibold text-primary-foreground shadow-gold disabled:opacity-60"
+        >
+          {busy ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
+          {busy ? "Processing..." : "Trigger Payout"}
+        </button>
+      </div>
+      {result && (
+        <div className="mt-4 rounded-2xl border border-success/30 bg-success/5 p-4 text-xs text-success">
+          Credited <span className="font-bold">{formatCurrency(result.total)}</span> to{" "}
+          <span className="font-bold">{result.processed}</span> user investments.
+        </div>
+      )}
     </div>
   );
 }

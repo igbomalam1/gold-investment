@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Mail, Globe, Shield, Wallet, ArrowUpRight, Loader2, Camera, TrendingUp } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,28 +17,31 @@ function ProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [pendingYield, setPendingYield] = useState(0);
   const [creditingYield, setCreditingYield] = useState(false);
+  const fetchedRef = useRef(false);
 
-  // Fetch pending yield
   useEffect(() => {
-    if (!user) return;
+    if (!user || fetchedRef.current) return;
+    fetchedRef.current = true;
+
     const fetchYield = async () => {
       const { data: investments } = await supabase
         .from("investments")
-        .select("amount, daily_roi_pct, started_at, ends_at, status")
+        .select("amount, daily_roi_pct, started_at, last_payout_at")
         .eq("user_id", user.id)
         .eq("status", "active");
 
       let total = 0;
-      (investments || []).forEach((i: any) => {
-        const start = new Date(i.started_at).getTime();
-        const end = new Date(i.ends_at).getTime();
-        const elapsed = Math.max(0, (Math.min(Date.now(), end) - start) / 86400000);
-        total += ((Number(i.amount) * Number(i.daily_roi_pct)) / 100) * elapsed;
-      });
+      for (const i of investments || []) {
+        const since = i.last_payout_at || i.started_at;
+        const days = Math.max(0, (Date.now() - new Date(since).getTime()) / 86400000);
+        if (days >= 1) {
+          total += (Number(i.amount) * Number(i.daily_roi_pct) / 100) * days;
+        }
+      }
       setPendingYield(total);
     };
     fetchYield();
-  }, [user, profile?.balance]);
+  }, [user]);
 
   const handleCreditYield = async () => {
     if (!user || pendingYield <= 0) return;
@@ -50,61 +53,15 @@ function ProfilePage() {
       if (error) {
         toast.error("Failed: " + error.message);
       } else {
+        const credited = Number(data) || 0;
+        toast.success(`Credited ${formatCurrency(credited)} to your balance!`);
+        setPendingYield(0);
         await refreshProfile();
-        toast.success(`Credited ${formatCurrency(Number(data))} to your balance!`);
-        // Refresh yield calc
-        const { data: investments } = await supabase
-          .from("investments")
-          .select("amount, daily_roi_pct, started_at, ends_at, status")
-          .eq("user_id", user.id)
-          .eq("status", "active");
-        let total = 0;
-        (investments || []).forEach((i: any) => {
-          const start = new Date(i.started_at).getTime();
-          const end = new Date(i.ends_at).getTime();
-          const elapsed = Math.max(0, (Math.min(Date.now(), end) - start) / 86400000);
-          total += ((Number(i.amount) * Number(i.daily_roi_pct)) / 100) * elapsed;
-        });
-        setPendingYield(total);
       }
     } catch (e: any) {
-      toast.error(e.message || "Failed to credit yield");
+      toast.error(e.message || "Failed");
     } finally {
       setCreditingYield(false);
-    }
-  };
-
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    try {
-      setUploading(true);
-      if (!e.target.files || e.target.files.length === 0) return;
-      if (!user) return;
-
-      const file = e.target.files[0];
-      const fileExt = file.name.split(".").pop();
-      const filePath = `${user.id}/${Math.random()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("avatars").getPublicUrl(filePath);
-
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ avatar_url: publicUrl })
-        .eq("id", user.id);
-
-      if (updateError) throw updateError;
-
-      await refreshProfile();
-      toast.success("Profile picture updated!");
-    } catch (error: any) {
-      toast.error(error.message || "Error uploading image");
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -188,32 +145,38 @@ function ProfilePage() {
             </div>
           </div>
         </div>
+      </div>
 
-        {pendingYield > 0 && (
-          <div className="rounded-3xl bg-gradient-emerald p-1 shadow-emerald">
-            <div className="h-full rounded-[calc(1.5rem-4px)] bg-card/80 p-8 backdrop-blur-xl flex flex-col justify-center">
-              <div className="text-xs font-bold uppercase tracking-[0.2em] text-success">
-                Pending Yield
+      {/* Yield Card */}
+      {pendingYield > 0 && (
+        <div className="rounded-3xl bg-gradient-emerald p-1 shadow-emerald">
+          <div className="rounded-[calc(1.5rem-4px)] bg-card/80 p-6 backdrop-blur-xl flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-success">
+                <TrendingUp size={14} /> Pending Yield
               </div>
-              <div className="mt-2 font-display text-4xl lg:text-5xl text-success">
+              <div className="mt-1 font-display text-3xl text-success">
                 {formatCurrency(pendingYield)}
               </div>
-              <button
-                onClick={handleCreditYield}
-                disabled={creditingYield}
-                className="mt-4 flex items-center justify-center gap-2 rounded-full bg-success/90 px-5 py-2.5 text-sm font-semibold text-white hover:bg-success transition-colors disabled:opacity-60"
-              >
-                {creditingYield ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <TrendingUp size={14} />
-                )}
-                {creditingYield ? "Crediting..." : "Withdraw Yield"}
-              </button>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Yield accumulated from your active investments.
+              </p>
             </div>
+            <button
+              onClick={handleCreditYield}
+              disabled={creditingYield}
+              className="flex items-center gap-2 rounded-full bg-success px-6 py-3 text-sm font-semibold text-white hover:bg-success/90 transition-colors disabled:opacity-60"
+            >
+              {creditingYield ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <TrendingUp size={14} />
+              )}
+              {creditingYield ? "Crediting..." : "Withdraw Yield"}
+            </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-3">
         {[

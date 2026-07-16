@@ -20,7 +20,7 @@ type AuthContextValue = {
   session: Session | null;
   user: User | null;
   profile: Profile | null;
-  isAdmin: boolean;
+  isAdmin: boolean | null;
   loading: boolean;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -36,12 +36,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const loadUserData = async (uid: string) => {
-    const [{ data: prof }, { data: roles }] = await Promise.all([
+    const [profResult, rolesResult] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", uid),
     ]);
-    setProfile(prof as Profile | null);
-    setIsAdmin(!!roles?.some((r) => r.role === "admin"));
+
+    if (profResult.error) {
+      console.error("[Auth] Profile fetch error:", profResult.error.message);
+    }
+    if (rolesResult.error) {
+      console.error("[Auth] Roles fetch error:", rolesResult.error.message, "Code:", rolesResult.error.code);
+    }
+
+    setProfile(profResult.data as Profile | null);
+
+    const roles = rolesResult.data;
+    const hasAdmin = !!roles?.some((r) => r.role === "admin");
+    console.log("[Auth] User roles:", roles, "isAdmin:", hasAdmin);
+    setIsAdmin(hasAdmin);
   };
 
   useEffect(() => {
@@ -110,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ session, user, profile, isAdmin: isAdmin ?? false, loading, refreshProfile, signOut }}
+      value={{ session, user, profile, isAdmin, loading, refreshProfile, signOut }}
     >
       {children}
     </AuthContext.Provider>

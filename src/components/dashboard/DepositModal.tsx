@@ -1,22 +1,23 @@
 import { useEffect, useState } from "react";
-import { X, Copy, CheckCircle2, Clock, ChevronRight, Loader2 } from "lucide-react";
-import { DEPOSIT_TOKENS } from "@/lib/mock-data";
+import { X, Copy, CheckCircle2, Clock, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 
-type Step = "amount" | "token" | "network" | "address";
+const DEPOSIT_WALLET = "0xe35260ba80c376d13f716499442996d6b6227218";
+
+type Step = "amount" | "address";
 
 export function DepositModal({ onClose }: { onClose: () => void }) {
+  const { user } = useAuth();
   const [step, setStep] = useState<Step>("amount");
   const [amount, setAmount] = useState("");
-  const [token, setToken] = useState<string | null>(null);
-  const [network, setNetwork] = useState<string | null>(null);
-  const [address, setAddress] = useState<string>("");
+  const [address] = useState<string>(DEPOSIT_WALLET);
   const [copied, setCopied] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(3600);
   const [loading, setLoading] = useState(false);
+  const [depositId, setDepositId] = useState<string | null>(null);
 
-  const tokenObj = DEPOSIT_TOKENS.find((t) => t.symbol === token);
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
   const ss = String(secondsLeft % 60).padStart(2, "0");
 
@@ -26,38 +27,50 @@ export function DepositModal({ onClose }: { onClose: () => void }) {
     return () => clearInterval(t);
   }, [step]);
 
-  const submitDeposit = async (chosenNetwork: string) => {
+  const submitDeposit = async () => {
     setLoading(true);
-    const { data, error } = await supabase.rpc("assign_deposit_wallet", {
-      _amount: Number(amount),
-      _token: token!,
-      _network: chosenNetwork,
-    });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    const dep = Array.isArray(data) ? data[0] : data;
-    setAddress(dep.wallet_address);
-    const ms = new Date(dep.expires_at).getTime() - Date.now();
-    setSecondsLeft(Math.max(0, Math.floor(ms / 1000)));
-    setNetwork(chosenNetwork);
-    setStep("address");
+    try {
+      const { data, error } = await supabase
+        .from("deposits")
+        .insert({
+          user_id: user?.id ?? "",
+          amount: Number(amount),
+          token: "ETH",
+          network: "ERC-20",
+          wallet_address: DEPOSIT_WALLET,
+          status: "pending",
+          expires_at: new Date(Date.now() + 3600 * 1000).toISOString(),
+        })
+        .select("id, expires_at")
+        .single();
 
-    // Fire welcome/notification email (non-blocking)
-    fetch("/api/send-email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ kind: "deposit_submitted", deposit_id: dep.id }),
-    }).catch(() => {});
+      setLoading(false);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+
+      setDepositId(data.id);
+      const ms = new Date(data.expires_at).getTime() - Date.now();
+      setSecondsLeft(Math.max(0, Math.floor(ms / 1000)));
+      setStep("address");
+
+      fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind: "deposit_submitted", deposit_id: data.id }),
+      }).catch(() => {});
+    } catch {
+      setLoading(false);
+      toast.error("Something went wrong. Please try again.");
+    }
   };
 
   return (
     <Modal onClose={onClose} title="Deposit funds">
       {step === "amount" && (
         <>
-          <Label>Amount in USD</Label>
+          <div className="text-xs font-medium text-foreground/85">Amount in USD</div>
           <input
             type="number"
             min={10}
@@ -68,61 +81,15 @@ export function DepositModal({ onClose }: { onClose: () => void }) {
           />
           <div className="mt-2 text-xs text-muted-foreground">Minimum $10. Maximum $1,000,000.</div>
           <button
-            disabled={!amount || +amount < 10}
-            onClick={() => setStep("token")}
+            disabled={!amount || +amount < 10 || loading}
+            onClick={submitDeposit}
             className="mt-5 w-full rounded-full bg-gradient-gold py-3 text-sm font-semibold text-primary-foreground shadow-gold disabled:opacity-50"
           >
-            Continue
-          </button>
-        </>
-      )}
-
-      {step === "token" && (
-        <>
-          <Label>Select token to deposit</Label>
-          <div className="grid grid-cols-2 gap-2">
-            {DEPOSIT_TOKENS.map((t) => (
-              <button
-                key={t.symbol}
-                onClick={() => {
-                  setToken(t.symbol);
-                  setStep("network");
-                }}
-                className="flex items-center justify-between rounded-xl border border-border bg-background/40 p-3 text-left hover:border-primary"
-              >
-                <div>
-                  <div className="font-bold">{t.symbol}</div>
-                  <div className="text-[11px] text-muted-foreground">{t.name}</div>
-                </div>
-                <ChevronRight size={14} className="text-muted-foreground" />
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-
-      {step === "network" && tokenObj && (
-        <>
-          <Label>Select network for {tokenObj.symbol}</Label>
-          <div className="space-y-2">
-            {tokenObj.networks.map((n) => (
-              <button
-                key={n}
-                disabled={loading}
-                onClick={() => submitDeposit(n)}
-                className="flex w-full items-center justify-between rounded-xl border border-border bg-background/40 p-3 hover:border-primary disabled:opacity-60"
-              >
-                <span className="text-sm font-medium">{n}</span>
-                {loading ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <ChevronRight size={14} className="text-muted-foreground" />
-                )}
-              </button>
-            ))}
-          </div>
-          <button onClick={() => setStep("token")} className="mt-3 text-xs text-muted-foreground">
-            ← Change token
+            {loading ? (
+              <span className="inline-flex items-center gap-2"><Loader2 size={14} className="animate-spin" /> Processing...</span>
+            ) : (
+              "Continue"
+            )}
           </button>
         </>
       )}
@@ -136,7 +103,7 @@ export function DepositModal({ onClose }: { onClose: () => void }) {
               </div>
               <div className="mt-1 font-display text-3xl text-gradient-gold">${amount}</div>
               <div className="mt-1 text-xs">
-                in <b>{token}</b> on <b>{network}</b>
+                in <b>ETH</b> on <b>ERC-20</b>
               </div>
 
               <div className="mt-5">
@@ -206,8 +173,4 @@ function Modal({
       </div>
     </div>
   );
-}
-
-function Label({ children }: { children: React.ReactNode }) {
-  return <div className="text-xs font-medium text-foreground/85">{children}</div>;
 }

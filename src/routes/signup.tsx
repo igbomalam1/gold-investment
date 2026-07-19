@@ -75,25 +75,17 @@ function SignupPage() {
       password,
       options: {
         emailRedirectTo: redirect,
-        data: { full_name: fullName, country },
+        data: {
+          full_name: fullName,
+          country,
+          ...(referralCode ? { referral_code: referralCode } : {}),
+        },
       },
     });
     setSubmitting(false);
     if (error) {
       toast.error(error.message || "Sign up failed");
       return;
-    }
-
-    if (data.user?.id && referralCode) {
-      // If it's a UUID (legacy), we can try direct update, else try RPC for short code
-      if (referralCode.length > 20) {
-        await supabase
-          .from("profiles")
-          .update({ referrer_id: referralCode })
-          .eq("id", data.user.id);
-      } else {
-        await supabase.rpc("apply_referral_code", { _code: referralCode });
-      }
     }
 
     toast.success("Account created — welcome to Gold Empire!");

@@ -1,109 +1,181 @@
 import { useEffect, useState } from "react";
-import { X, Copy, CheckCircle2, Clock, Loader2 } from "lucide-react";
+import { X, Copy, CheckCircle2, Clock, Loader2, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 
-const DEPOSIT_WALLET = "0xe35260ba80c376d13f716499442996d6b6227218";
+type Step = "select" | "payment";
 
-type Step = "amount" | "address";
+type DepositOption = { token: string; network: string };
+
+type DepositResult = {
+  id: string;
+  amount: number;
+  token: string;
+  network: string;
+  wallet_address: string;
+  expires_at: string;
+};
 
 export function DepositModal({ onClose }: { onClose: () => void }) {
   const { user } = useAuth();
-  const [step, setStep] = useState<Step>("amount");
+  const [step, setStep] = useState<Step>("select");
+  const [options, setOptions] = useState<DepositOption[]>([]);
+  const [loadingOptions, setLoadingOptions] = useState(true);
+  const [selected, setSelected] = useState<DepositOption | null>(null);
   const [amount, setAmount] = useState("");
-  const [address] = useState<string>(DEPOSIT_WALLET);
+  const [submitting, setSubmitting] = useState(false);
+  const [deposit, setDeposit] = useState<DepositResult | null>(null);
   const [copied, setCopied] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(3600);
-  const [loading, setLoading] = useState(false);
-  const [depositId, setDepositId] = useState<string | null>(null);
 
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
   const ss = String(secondsLeft % 60).padStart(2, "0");
 
   useEffect(() => {
-    if (step !== "address") return;
+    (async () => {
+      const { data, error } = await supabase.rpc("get_active_deposit_options");
+      setLoadingOptions(false);
+      if (error) {
+        console.error(error);
+        toast.error("Failed to load deposit options");
+        return;
+      }
+      setOptions((data as DepositOption[]) || []);
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (step !== "payment" || !deposit) return;
     const t = setInterval(() => setSecondsLeft((s) => Math.max(0, s - 1)), 1000);
     return () => clearInterval(t);
-  }, [step]);
+  }, [step, deposit]);
 
-  const submitDeposit = async () => {
-    setLoading(true);
+  const handleSubmit = async () => {
+    if (!selected || !amount || +amount < 10) return;
+    setSubmitting(true);
     try {
-      const { data, error } = await supabase
-        .from("deposits")
-        .insert({
-          user_id: user?.id ?? "",
-          amount: Number(amount),
-          token: "ETH",
-          network: "ERC-20",
-          wallet_address: DEPOSIT_WALLET,
-          status: "pending",
-          expires_at: new Date(Date.now() + 3600 * 1000).toISOString(),
-        })
-        .select("id, expires_at")
-        .single();
-
-      setLoading(false);
+      const { data, error } = await supabase.rpc("assign_deposit_wallet", {
+        _amount: Number(amount),
+        _token: selected.token,
+        _network: selected.network,
+      });
+      setSubmitting(false);
       if (error) {
         toast.error(error.message);
         return;
       }
-
-      setDepositId(data.id);
-      const ms = new Date(data.expires_at).getTime() - Date.now();
+      const dep = data as DepositResult;
+      setDeposit(dep);
+      const ms = new Date(dep.expires_at).getTime() - Date.now();
       setSecondsLeft(Math.max(0, Math.floor(ms / 1000)));
-      setStep("address");
+      setStep("payment");
 
       fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind: "deposit_submitted", deposit_id: data.id }),
+        body: JSON.stringify({ kind: "deposit_submitted", deposit_id: dep.id }),
       }).catch(() => {});
     } catch {
-      setLoading(false);
+      setSubmitting(false);
       toast.error("Something went wrong. Please try again.");
     }
   };
 
+  const grouped = options.reduce<Record<string, DepositOption[]>>((acc, o) => {
+    (acc[o.token] ||= []).push(o);
+    return acc;
+  }, {});
+
   return (
     <Modal onClose={onClose} title="Deposit funds">
-      {step === "amount" && (
+      {step === "select" && (
         <>
-          <div className="text-xs font-medium text-foreground/85">Amount in USD</div>
-          <input
-            type="number"
-            min={10}
-            placeholder="100"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="w-full rounded-xl border border-border bg-background/60 px-4 py-3 text-lg font-display outline-none focus:border-primary"
-          />
-          <div className="mt-2 text-xs text-muted-foreground">Minimum $10. Maximum $1,000,000.</div>
-          <button
-            disabled={!amount || +amount < 10 || loading}
-            onClick={submitDeposit}
-            className="mt-5 w-full rounded-full bg-gradient-gold py-3 text-sm font-semibold text-primary-foreground shadow-gold disabled:opacity-50"
-          >
-            {loading ? (
-              <span className="inline-flex items-center gap-2"><Loader2 size={14} className="animate-spin" /> Processing...</span>
-            ) : (
-              "Continue"
-            )}
-          </button>
+          {loadingOptions ? (
+            <div className="flex items-center justify-center py-10">
+              <Loader2 size={20} className="animate-spin text-primary" />
+            </div>
+          ) : options.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border/70 px-4 py-8 text-center text-sm text-muted-foreground">
+              No deposit options available. Please contact support.
+            </div>
+          ) : (
+            <>
+              <div>
+                <div className="text-xs font-medium text-foreground/85">Select token</div>
+                <div className="mt-2 grid gap-2">
+                  {Object.entries(grouped).map(([token, opts]) => (
+                    <div key={token} className="rounded-xl border border-border/60 bg-background/40 p-3">
+                      <div className="text-xs font-semibold text-foreground/80">{token}</div>
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {opts.map((o) => {
+                          const active = selected?.token === o.token && selected?.network === o.network;
+                          return (
+                            <button
+                              key={o.network}
+                              type="button"
+                              onClick={() => setSelected(o)}
+                              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                                active
+                                  ? "bg-primary text-primary-foreground shadow-gold"
+                                  : "border border-border bg-background/60 text-foreground hover:border-primary"
+                              }`}
+                            >
+                              {o.network}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-3">
+                <div className="text-xs font-medium text-foreground/85">Amount in USD</div>
+                <input
+                  type="number"
+                  min={10}
+                  placeholder="100"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="w-full rounded-xl border border-border bg-background/60 px-4 py-3 text-lg font-display outline-none focus:border-primary"
+                />
+                <div className="mt-1 text-xs text-muted-foreground">Minimum $10.</div>
+              </div>
+
+              <button
+                disabled={!selected || !amount || +amount < 10 || submitting}
+                onClick={handleSubmit}
+                className="mt-3 w-full rounded-full bg-gradient-gold py-3 text-sm font-semibold text-primary-foreground shadow-gold disabled:opacity-50"
+              >
+                {submitting ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 size={14} className="animate-spin" /> Processing...
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-2">
+                    Continue <ChevronRight size={14} />
+                  </span>
+                )}
+              </button>
+            </>
+          )}
         </>
       )}
 
-      {step === "address" && (
+      {step === "payment" && deposit && (
         <>
           <div className="rounded-2xl bg-gradient-emerald p-1">
             <div className="rounded-[calc(1rem-4px)] bg-card/90 p-5 text-center">
               <div className="text-xs uppercase tracking-wider text-muted-foreground">
                 Send exactly
               </div>
-              <div className="mt-1 font-display text-3xl text-gradient-gold">${amount}</div>
+              <div className="mt-1 font-display text-3xl text-gradient-gold">
+                ${deposit.amount}
+              </div>
               <div className="mt-1 text-xs">
-                in <b>ETH</b> on <b>ERC-20</b>
+                in <b>{deposit.token}</b> on <b>{deposit.network}</b>
               </div>
 
               <div className="mt-5">
@@ -111,11 +183,13 @@ export function DepositModal({ onClose }: { onClose: () => void }) {
                   <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
                     Wallet address
                   </div>
-                  <div className="mt-1 break-all font-mono text-xs">{address}</div>
+                  <div className="mt-1 break-all font-mono text-xs">
+                    {deposit.wallet_address}
+                  </div>
                 </div>
                 <button
                   onClick={() => {
-                    navigator.clipboard?.writeText(address);
+                    navigator.clipboard?.writeText(deposit.wallet_address);
                     setCopied(true);
                     setTimeout(() => setCopied(false), 1800);
                   }}

@@ -519,6 +519,13 @@ export type Database = {
           masked_identity: string;
         }[];
       };
+      get_active_deposit_options: {
+        Args: Record<string, never>;
+        Returns: {
+          network: string;
+          token: string;
+        }[];
+      };
       investment_profit: {
         Args: { _inv: Database["public"]["Tables"]["investments"]["Row"] };
         Returns: number;

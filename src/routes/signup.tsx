@@ -84,6 +84,7 @@ function SignupPage() {
     });
     setSubmitting(false);
     if (error) {
+      console.error("[signup] signUp error:", error);
       toast.error(error.message || "Sign up failed");
       return;
     }

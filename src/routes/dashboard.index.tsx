@@ -79,8 +79,13 @@ function DashboardHome() {
       console.error(investmentError);
     }
 
+    console.log("[referrals] user.id:", user.id);
+    console.log("[referrals] referralData:", referralData);
+    console.log("[referrals] referralError:", referralError);
+
     if (referralError) {
-      console.error(referralError);
+      toast.error("Referral load error: " + referralError.message);
+      console.error("[referrals] full error:", referralError);
     }
 
     setInvestments((investmentData as unknown as Inv[]) || []);
